@@ -2,6 +2,7 @@ package com.aim.project.pwp.instance;
 
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.stream.IntStream;
@@ -48,7 +49,27 @@ public class PWPInstance implements PWPInstanceInterface {
 	@Override
 	public PWPSolution createSolution(InitialisationMode mode) {
 		
-		// TODO construct a new 'PWPSolution' using RANDOM initialisation
+		//***** do i need to specify if mode == random?
+		// construct a new 'PWPSolution' using RANDOM initialisation
+
+		if(mode == InitialisationMode.RANDOM) {
+			int[] permutation = new int[getNumberOfLocations() - 2];
+			for (int i = 0; i < getNumberOfLocations() - 2; i++) {
+				permutation[i] = i;
+			}
+			//random swap
+			for (int i = 0; i < permutation.length; i++) {
+				int randomIndexToSwap = oRandom.nextInt(permutation.length);
+				int temp = permutation[randomIndexToSwap];
+				permutation[randomIndexToSwap] = permutation[i];
+				permutation[i] = temp;
+			}
+
+			SolutionRepresentation solRep = new SolutionRepresentation(permutation);
+			return new PWPSolution(solRep, getPWPObjectiveFunction().getObjectiveFunctionValue(solRep));
+		}
+
+		return null;
 	}
 	
 	@Override
@@ -87,8 +108,15 @@ public class PWPInstance implements PWPInstanceInterface {
 	
 	@Override
 	public ArrayList<Location> getSolutionAsListOfLocations(PWPSolutionInterface oSolution) {
-		
-		// TODO return an 'ArrayList' of ALL LOCATIONS in the solution.
+
+		//return an 'ArrayList' of ALL LOCATIONS in the solution.
+		int[] permutation = oSolution.getSolutionRepresentation().getSolutionRepresentation();
+		ArrayList<Location> aloLoc = new ArrayList<>(permutation.length);
+		for (int i = 0; i < permutation.length; i++){
+			aloLoc.add(aoLocations[permutation[i]]);
+		}
+
+		return aloLoc;
 	}
 
 }

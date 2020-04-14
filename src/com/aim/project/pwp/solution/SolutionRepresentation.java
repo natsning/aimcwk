@@ -31,14 +31,17 @@ public class SolutionRepresentation implements SolutionRepresentationInterface {
 
 	@Override
 	public int getNumberOfLocations() {
-
-		// TODO return the total number of locations in this instance (includes DEPOT and HOME).
+		//return the total number of locations in this instance (includes DEPOT and HOME).
+		return this.aiSolutionRepresentation.length+2;
 	}
 
 	@Override
 	public SolutionRepresentationInterface clone() {
+		// perform a DEEP clone of the solution representation!
+		int[] aoClone = new int[aiSolutionRepresentation.length];
+		System.arraycopy(aiSolutionRepresentation, 0, aoClone, 0, aiSolutionRepresentation.length);
 
-		// TODO perform a DEEP clone of the solution representation!
+		return new SolutionRepresentation(aoClone);
 	}
 
 }
