@@ -9,7 +9,7 @@ public interface HeuristicInterface {
 	 * @param dDepthOfSearch The current depth of search setting.
 	 * @param dIntensityOfMutation The current intensity of mutation setting.
 	 */
-	public double apply(PWPSolutionInterface oSolution, double dDepthOfSearch, double dIntensityOfMutation);
+	public double apply( PWPSolutionInterface oSolution, ObjectiveFunctionInterface oObjectiveFunction, double dDepthOfSearch, double dIntensityOfMutation);
 	
 	public boolean isCrossover();
 	
