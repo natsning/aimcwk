@@ -1,24 +1,40 @@
 package com.aim.project.pwp;
 
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 public class tester {
 
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
 //        List<Integer> aloPermutation = new ArrayList<>();
 //        for (int i : permutation){
 //            aloPermutation.add(i);
-     // test delta evaluation
-//        int[] permutation = {70,80,94,95};
-//        int[] prev = {70,80,94,95};
+        // test delta evaluation
+//        int[] permutation = {1,2,3,4,5,6,7,8,9,10};
+//        int[] prev = new int[permutation.length];
+//        System.arraycopy(permutation,0,prev,0,permutation.length);
+//
 //        int lastIndex = prev.length-1;
-//        int indexToSwap = new Random().nextInt(permutation.length);
-//        int adjacentIndex = (indexToSwap + 1) % permutation.length;
-//        int temp = permutation[indexToSwap];
-//        permutation[indexToSwap] = permutation[adjacentIndex];
-//        permutation[adjacentIndex] = temp;
+//        Random r = new Random();
+//        int indexToSwap,adjacentIndex,temp;
+//
+//        for (int q = 0 ; q < 4 ; q++){
+//            indexToSwap = r.nextInt(permutation.length);
+//            adjacentIndex = (indexToSwap + 1) % permutation.length;
+//            temp = permutation[indexToSwap];
+//            permutation[indexToSwap] = permutation[adjacentIndex];
+//            permutation[adjacentIndex] = temp;
+//
+//            System.out.println(" old");
+//            for(int i : prev) {
+//                System.out.printf("%d ",i);
+//            }
+//            System.arraycopy(permutation,0,prev,0,permutation.length);
+//        }
 //        int oriCost = (70-20) + (80-70) + (94-80) + (95-94) + (120-95); //depot 20, home 120
 //        int newCost = 0;
 //        for(int i : permutation) {
@@ -44,8 +60,38 @@ public class tester {
 //                    + Math.abs(permutation[indexToSwap]-permutation[indexToSwap-1]) + Math.abs(permutation[adjacentIndex]-permutation[adjacentIndex+1]);
 //        }
 //        System.out.printf(": %d",newCost);
-    }
+        // invertion mutation
+//        for (int k = 0; k < 2; k++) {
+//
+//            //pick two indexes
+//            int i = r.nextInt(permutation.length);
+//            int j = i;
+//            while (j == i) { //ensures i and j are two different indexes
+//                j = r.nextInt(permutation.length);
+//            }
+//            if (i > j) { //i will always be smaller than j
+//                int temp = i;
+//                i = j;
+//                j = temp;
+//            }
+//            System.out.printf("\n%d, %d\n",i,j);
+//
+//
+//            for (int h = i; h <= j; h++) {
+//                aloPermutation.add(permutation[h]);
+//            }
+//            Collections.reverse(aloPermutation);
+//            for (int h = 0; h < aloPermutation.size(); h++) {
+//                permutation[i] = aloPermutation.get(h);
+//                i++;
+//            }
+//            aloPermutation.clear();
+//            for(int h : permutation) {
+//                System.out.printf("%d ",h);
+//            }
 
+
+    }
 //
 }
     //cd Y2S2-AIM/cw/cwk/src/com/aim/project/pwp
