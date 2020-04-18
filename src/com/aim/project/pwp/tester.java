@@ -15,12 +15,14 @@ public class tester {
         for (int i : permutation) {
             aloPermutation.add(i);
         }
+        Random r = new Random();
+        int start = r.nextInt(permutation.length);
+        System.out.println(start);
         // test delta evaluation
 //        int[] prev = new int[permutation.length];
 //        System.arraycopy(permutation,0,prev,0,permutation.length);
 //
 //        int lastIndex = prev.length-1;
-//        Random r = new Random();
 //        int indexToSwap,adjacentIndex,temp;
 //
 //        for (int q = 0 ; q < 4 ; q++){
@@ -98,6 +100,9 @@ public class tester {
 //            }
 //
 //        }//end for
+        for(int i=start; i<permutation.length+start ; i++){
+            System.out.println(permutation[i%permutation.length]);
+        }
 
 
     }

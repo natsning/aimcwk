@@ -20,8 +20,8 @@ public class Reinsertion extends HeuristicOperators implements HeuristicInterfac
 	}
 
 	@Override
-	public double apply(PWPSolutionInterface oSolution, ObjectiveFunctionInterface oObjFunc, double depthOfSearch, double intensityOfMutation) {
-		int intensity = (int)Math.floor(intensityOfMutation / 0.2) + 1;
+	public double apply(PWPSolutionInterface oSolution, double depthOfSearch, double intensityOfMutation) {
+		int times = (int)Math.floor(intensityOfMutation / 0.2) + 1;
 		double newCost = 0;
 		int[] permutation = oSolution.getSolutionRepresentation().getSolutionRepresentation();
 		int[] prevPermutation;
@@ -29,7 +29,7 @@ public class Reinsertion extends HeuristicOperators implements HeuristicInterfac
 		for (int i : permutation)
 			aloPermutation.add(i);
 
-		for(int k = 0; k<intensity ; k++){
+		for(int k = 0; k<times ; k++){
 
 			int[] pair = chooseTwo(permutation.length,oRandom);
 			int i = pair[0], j = pair[1];
@@ -42,7 +42,7 @@ public class Reinsertion extends HeuristicOperators implements HeuristicInterfac
 			for(int h=0 ; h<aloPermutation.size(); h++) {
 				permutation[h] = aloPermutation.get(h);
 			}
-			newCost = deltaEvaluation(oSolution,oObjFunc,prevPermutation,i,j);
+			newCost = deltaEvaluation(oSolution,prevPermutation,i,j);
 			oSolution.setObjectiveFunctionValue(newCost);
 
 		}
@@ -65,9 +65,10 @@ public class Reinsertion extends HeuristicOperators implements HeuristicInterfac
 		return false;
 	}
 
-	public double deltaEvaluation(PWPSolutionInterface sol, ObjectiveFunctionInterface objFunc, int[] prev, int i, int j){
+	public double deltaEvaluation(PWPSolutionInterface sol, int[] prev, int i, int j){
         double newCost;
         double original = sol.getObjectiveFunctionValue();
+		ObjectiveFunctionInterface objFunc = getoObjectiveFunction();
         int lastIndex = prev.length-1;
         int[] current = sol.getSolutionRepresentation().getSolutionRepresentation();
 

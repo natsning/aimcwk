@@ -19,14 +19,14 @@ public class InversionMutation extends HeuristicOperators implements HeuristicIn
 	}
 
 	@Override
-	public double apply(PWPSolutionInterface oSolution, ObjectiveFunctionInterface oObjFunc, double dDepthOfSearch, double dIntensityOfMutation) {
-		int intensity = (int)Math.floor(dIntensityOfMutation / 0.2) + 1;
+	public double apply(PWPSolutionInterface oSolution, double dDepthOfSearch, double dIntensityOfMutation) {
+		int times = (int)Math.floor(dIntensityOfMutation / 0.2) + 1;
 		int[] permutation = oSolution.getSolutionRepresentation().getSolutionRepresentation();
 		int[] prevPermutation;
 		ArrayList<Integer> aloSubPermutation = new ArrayList<>();
 		double newCost = 0;
 
-		for(int k = 0; k<intensity ; k++){
+		for(int k = 0; k<times ; k++){
 
 			int[] pair = chooseTwo(permutation.length,oRandom);
 			int i = pair[0], j = pair[1];
@@ -48,7 +48,7 @@ public class InversionMutation extends HeuristicOperators implements HeuristicIn
 			}
 			aloSubPermutation.clear();
 
-			newCost = deltaEvaluation(oSolution,oObjFunc,prevPermutation,i,j);
+			newCost = deltaEvaluation(oSolution,prevPermutation,i,j);
 			oSolution.setObjectiveFunctionValue(newCost);
 
 		}//end for
@@ -71,11 +71,12 @@ public class InversionMutation extends HeuristicOperators implements HeuristicIn
 		return false;
 	}
 
-	public double deltaEvaluation(PWPSolutionInterface sol, ObjectiveFunctionInterface objFunc, int[] prev, int i, int j){
+	public double deltaEvaluation(PWPSolutionInterface sol, int[] prev, int i, int j){
 		double newCost;
-		double original = sol.getObjectiveFunctionValue();
 		int lastIndex = prev.length-1;
+		double original = sol.getObjectiveFunctionValue();
 		int[] current = sol.getSolutionRepresentation().getSolutionRepresentation();
+		ObjectiveFunctionInterface objFunc = getoObjectiveFunction();
 
 		if (i==0 && j==lastIndex){ //if first and last are chosen
 			newCost = original
