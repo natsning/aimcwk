@@ -10,11 +10,12 @@ public class tester {
 
 
     public static void main(String[] args) {
-//        List<Integer> aloPermutation = new ArrayList<>();
-//        for (int i : permutation){
-//            aloPermutation.add(i);
+        int[] permutation = {0,1,2,3,4,5,6,7,8,9,10};
+        List<Integer> aloPermutation = new ArrayList<>();
+        for (int i : permutation) {
+            aloPermutation.add(i);
+        }
         // test delta evaluation
-//        int[] permutation = {1,2,3,4,5,6,7,8,9,10};
 //        int[] prev = new int[permutation.length];
 //        System.arraycopy(permutation,0,prev,0,permutation.length);
 //
@@ -60,22 +61,26 @@ public class tester {
 //                    + Math.abs(permutation[indexToSwap]-permutation[indexToSwap-1]) + Math.abs(permutation[adjacentIndex]-permutation[adjacentIndex+1]);
 //        }
 //        System.out.printf(": %d",newCost);
-        // invertion mutation
+        // invertion mutation & reinsertion
 //        for (int k = 0; k < 2; k++) {
 //
-//            //pick two indexes
+            //pick two indexes
 //            int i = r.nextInt(permutation.length);
 //            int j = i;
 //            while (j == i) { //ensures i and j are two different indexes
 //                j = r.nextInt(permutation.length);
 //            }
+//            System.out.printf("\n%d, %d\n",i,j);
+//
+//            Integer removed = aloPermutation.get(i);
+//            aloPermutation.remove(i);
+//            aloPermutation.add(j,removed);
+
 //            if (i > j) { //i will always be smaller than j
 //                int temp = i;
 //                i = j;
 //                j = temp;
 //            }
-//            System.out.printf("\n%d, %d\n",i,j);
-//
 //
 //            for (int h = i; h <= j; h++) {
 //                aloPermutation.add(permutation[h]);
@@ -86,9 +91,13 @@ public class tester {
 //                i++;
 //            }
 //            aloPermutation.clear();
-//            for(int h : permutation) {
-//                System.out.printf("%d ",h);
+//
+//            for(int h=0 ; h<aloPermutation.size(); h++) {
+//                permutation[h] = aloPermutation.get(h);
+//                System.out.printf("%d ", permutation[h]);
 //            }
+//
+//        }//end for
 
 
     }

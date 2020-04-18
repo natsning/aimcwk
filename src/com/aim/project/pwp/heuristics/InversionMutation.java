@@ -28,12 +28,8 @@ public class InversionMutation extends HeuristicOperators implements HeuristicIn
 
 		for(int k = 0; k<intensity ; k++){
 
-			//pick two indexes
-			int i = oRandom.nextInt(permutation.length);
-			int j = i;
-			while(j == i){ //ensures i and j are two different indexes
-				j = oRandom.nextInt(permutation.length);
-			}
+			int[] pair = chooseTwo(permutation.length,oRandom);
+			int i = pair[0], j = pair[1];
 			if(i>j){ //i will always be smaller than j
 				int temp = i;
 				i = j;
