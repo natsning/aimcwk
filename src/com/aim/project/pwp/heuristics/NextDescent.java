@@ -35,7 +35,7 @@ public class NextDescent extends HeuristicOperators implements HeuristicInterfac
 		int[] prevPermutation = oSolution.clone().getSolutionRepresentation().getSolutionRepresentation();
 		int indexToSwap,adjacentIndex;
 
-		while(times!=0 || index<permutation.length+start){
+		while(times>0 || index<permutation.length+start){
 
 			indexToSwap = index % permutation.length;
 			adjacentIndex = (index+1) % permutation.length;
@@ -46,7 +46,7 @@ public class NextDescent extends HeuristicOperators implements HeuristicInterfac
 				//accept
 				oSolution.setObjectiveFunctionValue(newCost);
 				originalCost = newCost;
-				times ++;
+				times --;
 				prevPermutation = oSolution.clone().getSolutionRepresentation().getSolutionRepresentation();;
 
 			}else{
