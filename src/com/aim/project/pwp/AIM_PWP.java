@@ -4,16 +4,11 @@ package com.aim.project.pwp;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
-import com.aim.project.pwp.heuristics.AdjacentSwap;
-import com.aim.project.pwp.heuristics.CX;
-import com.aim.project.pwp.heuristics.DavissHillClimbing;
-import com.aim.project.pwp.heuristics.InversionMutation;
-import com.aim.project.pwp.heuristics.NextDescent;
-import com.aim.project.pwp.heuristics.OX;
-import com.aim.project.pwp.heuristics.Reinsertion;
+import com.aim.project.pwp.heuristics.*;
 import com.aim.project.pwp.instance.InitialisationMode;
 import com.aim.project.pwp.instance.Location;
 import com.aim.project.pwp.instance.reader.PWPInstanceReader;
@@ -22,7 +17,6 @@ import com.aim.project.pwp.interfaces.ObjectiveFunctionInterface;
 import com.aim.project.pwp.interfaces.PWPInstanceInterface;
 import com.aim.project.pwp.interfaces.PWPSolutionInterface;
 import com.aim.project.pwp.interfaces.Visualisable;
-import com.aim.project.pwp.interfaces.XOHeuristicInterface;
 
 import AbstractClasses.ProblemDomain;
 
@@ -48,25 +42,42 @@ public class AIM_PWP extends ProblemDomain implements Visualisable {
 		
 		super(seed);
 
-		// TODO - set default memory size and create the array of low-level heuristics
+		// set default memory size and create the array of low-level heuristics
+		aoMemoryOfSolutions = new PWPSolutionInterface[2];
+		aoHeuristics = new HeuristicInterface[getNumberOfHeuristics()];
+
+		aoHeuristics[0] = new InversionMutation(rng);
+		aoHeuristics[1] = new AdjacentSwap(rng);
+		aoHeuristics[2] = new Reinsertion(rng);
+		aoHeuristics[3] = new NextDescent(rng);
+		aoHeuristics[4] = new DavissHillClimbing(rng);
+		aoHeuristics[5] = new OX(rng);
+		aoHeuristics[6] = new CX(rng);
 		
 	}
 	
 	public PWPSolutionInterface getSolution(int index) {
 		
-		// TODO 
+		return this.aoMemoryOfSolutions[index];
 	}
 	
 	public PWPSolutionInterface getBestSolution() {
 		
-		// TODO 
+		return this.oBestSolution;
 	}
 
 	@Override
 	public double applyHeuristic(int hIndex, int currentIndex, int candidateIndex) {
 		
-		// TODO - apply heuristic and return the objective value of the candidate solution
+		// apply heuristic and return the objective value of the candidate solution
 		//			remembering to keep track/update the best solution
+		copySolution(currentIndex,candidateIndex);
+		double newObjVal = aoHeuristics[hIndex].apply(getSolution(candidateIndex),depthOfSearch,intensityOfMutation);
+
+		if(newObjVal<getBestSolutionValue()){
+			updateBestSolution(candidateIndex);
+		}
+		return newObjVal;
 	}
 
 	@Override
@@ -74,30 +85,23 @@ public class AIM_PWP extends ProblemDomain implements Visualisable {
 		
 		// TODO - apply heuristic and return the objective value of the candidate solution
 		//			remembering to keep track/update the best solution
-	}
 
-	@Override
-	public String bestSolutionToString() {
-		
-		// TODO return the location IDs of the best solution including DEPOT and HOME locations
-		//		e.g. "DEPOT -> 0 -> 2 -> 1 -> HOME"
 	}
 
 	@Override
 	public boolean compareSolutions(int iIndexA, int iIndexB) {
 
 		//return true if the objective values of the two solutions are the same, else false
-		return aoMemoryOfSolutions[iIndexA].getObjectiveFunctionValue()==aoMemoryOfSolutions[iIndexB].getObjectiveFunctionValue();
+		return getSolution(iIndexA).getObjectiveFunctionValue()==getSolution(iIndexB).getObjectiveFunctionValue();
 	}
 
 	@Override
-	public void copySolution(int iIndexA, int iIndexB) {
+	public void copySolution(int iIndexSource, int iIndexDestination) {
 
-		// TODO - BEWARE this should copy the solution, not the reference to it!
+		// BEWARE this should copy the solution, not the reference to it!
 		//			That is, that if we apply a heuristic to the solution in index 'b',
 		//			then it does not modify the solution in index 'a' or vice-versa.
-		
-		
+		aoMemoryOfSolutions[iIndexDestination] = getSolution(iIndexSource).clone();
 	}
 
 	@Override
@@ -117,32 +121,80 @@ public class AIM_PWP extends ProblemDomain implements Visualisable {
 	public int[] getHeuristicsOfType(HeuristicType type) {
 		
 		// TODO return an array of heuristic IDs based on the heuristic's type.
+		if(type == HeuristicType.MUTATION){
+			return getHeuristicsThatUseIntensityOfMutation();
+		}
+		else if(type == HeuristicType.LOCAL_SEARCH){
+			return getHeuristicsThatUseDepthOfSearch();
+		}
+		else if(type == HeuristicType.CROSSOVER){
+			return getHeuristicsThatAreCrossovers();
+		}
+		else if(type == HeuristicType.RUIN_RECREATE){
+
+			return
+		}else{
+			return
+		}
 		
 	}
 
 	@Override
 	public int[] getHeuristicsThatUseDepthOfSearch() {
-		
-		// TODO return the array of heuristic IDs that use depth of search.
+
+		// return the array of heuristic IDs that use depth of search.
+		ArrayList<Integer> arrayList = new ArrayList<>();
+		for(int i=0; i<aoHeuristics.length; i++){
+			if(aoHeuristics[i].usesDepthOfSearch()){
+				arrayList.add(i);
+			}
+		}
+		return convertArrayListToArray(arrayList);
 	}
 
 	@Override
 	public int[] getHeuristicsThatUseIntensityOfMutation() {
 		
-		// TODO return the array of heuristic IDs that use intensity of mutation.
+		// return the array of heuristic IDs that use intensity of mutation.
+		ArrayList<Integer> arrayList = new ArrayList<>();
+		for(int i=0; i<aoHeuristics.length; i++){
+			if(aoHeuristics[i].usesIntensityOfMutation())){
+				arrayList.add(i);
+			}
+		}
+		return convertArrayListToArray(arrayList);
+	}
+
+	public int[] getHeuristicsThatAreCrossovers(){
+		ArrayList<Integer> arrayList = new ArrayList<>();
+		for(int i=0; i<aoHeuristics.length; i++){
+			if(aoHeuristics[i].isCrossover()){
+				arrayList.add(i);
+			}
+		}
+		return convertArrayListToArray(arrayList);
+	}
+
+	private int[] convertArrayListToArray(ArrayList<Integer> al){
+		int[] array = new int[al.size()];
+		for(int i=0;i<al.size();i++){
+			array[i] = al.get(i);
+		}
+		return array;
 	}
 
 	@Override
 	public int getNumberOfHeuristics() {
 
 		// TODO - has to be hard-coded due to the design of the HyFlex framework...
-		return 7;
+		return 7; //what to do?
 	}
 
 	@Override
 	public int getNumberOfInstances() {
 
 		// TODO return the number of available instances
+		return instanceFiles.length;
 	}
 
 	@Override
@@ -150,10 +202,14 @@ public class AIM_PWP extends ProblemDomain implements Visualisable {
 		
 		// TODO - initialise a solution in index 'index' 
 		// 		making sure that you also update the best solution!
+		aoMemoryOfSolutions[index]= oInstance.createSolution(InitialisationMode.RANDOM);
+		if(getSolution(index).getObjectiveFunctionValue() < getBestSolutionValue()){
+			updateBestSolution(index);
+		}
 		
 	}
 
-	// TODO implement the instance reader that this method uses
+	// implement the instance reader that this method uses
 	//		to correctly read in the PWP instance, and set up the objective function.
 	@Override
 	public void loadInstance(int instanceId) {
@@ -176,18 +232,43 @@ public class AIM_PWP extends ProblemDomain implements Visualisable {
 	@Override
 	public void setMemorySize(int size) {
 
-		// TODO sets a new memory size
 		// IF the memory size is INCREASED, then
 		//		the existing solutions should be copied to the new memory at the same indices.
 		// IF the memory size is DECREASED, then
 		//		the first 'size' solutions are copied to the new memory.
+		PWPSolutionInterface[] newArray = new PWPSolutionInterface[size];
+		for(int i=0; i<size; i++){
+			newArray[i] = getSolution(i).clone();
+		}
+		aoMemoryOfSolutions = newArray;
 	}
 
 	@Override
 	public String solutionToString(int index) {
 
-		// TODO
+		int[] city_ids = getSolution(index).getSolutionRepresentation().getSolutionRepresentation();
+		return cityIDToString(city_ids);
+	}
 
+	@Override
+	public String bestSolutionToString() {
+
+		// return the location IDs of the best solution including DEPOT and HOME locations
+		//		e.g. "DEPOT -> 0 -> 2 -> 1 -> HOME"
+		int[] city_ids = oBestSolution.getSolutionRepresentation().getSolutionRepresentation();
+		return cityIDToString(city_ids);
+	}
+
+	private String cityIDToString(int[] city_ids){
+
+		String[] strings = new String[city_ids.length+2];
+		strings[0] = "DEPOT";
+		strings[strings.length-1]= "HOME";
+
+		for(int i=1;i<=city_ids.length;i++){
+			strings[i] = Integer.toString(city_ids[i-1]);
+		}
+		return String.join(" -> ",strings);
 	}
 
 	@Override
@@ -198,7 +279,7 @@ public class AIM_PWP extends ProblemDomain implements Visualisable {
 	
 	private void updateBestSolution(int index) {
 		
-		// TODO
+		oBestSolution = getSolution(index);
 		
 	}
 	

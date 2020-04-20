@@ -21,14 +21,14 @@ public class InversionMutation extends HeuristicOperators implements HeuristicIn
 	@Override
 	public double apply(PWPSolutionInterface oSolution, double dDepthOfSearch, double dIntensityOfMutation) {
 		int times = (int)Math.floor(dIntensityOfMutation / 0.2) + 1;
-		int[] permutation = oSolution.getSolutionRepresentation().getSolutionRepresentation();
-		int[] prevPermutation;
-		ArrayList<Integer> aloSubPermutation = new ArrayList<>();
+		int[] city_ids = oSolution.getSolutionRepresentation().getSolutionRepresentation();
+		int[] prevCity_ids;
+		ArrayList<Integer> aloSubCity_ids = new ArrayList<>();
 		double newCost = 0;
 
 		for(int k = 0; k<times ; k++){
 
-			int[] pair = chooseTwo(permutation.length,oRandom);
+			int[] pair = chooseTwo(city_ids.length,oRandom);
 			int i = pair[0], j = pair[1];
 			if(i>j){ //i will always be smaller than j
 				int temp = i;
@@ -36,19 +36,19 @@ public class InversionMutation extends HeuristicOperators implements HeuristicIn
 				j = temp;
 			}
 
-			prevPermutation = oSolution.clone().getSolutionRepresentation().getSolutionRepresentation();
+			prevCity_ids = oSolution.clone().getSolutionRepresentation().getSolutionRepresentation();
 			//reverse
 			for (int h = i; h <= j; h++ ){
-				aloSubPermutation.add(permutation[h]);
+				aloSubCity_ids.add(city_ids[h]);
 			}
-			Collections.reverse(aloSubPermutation);
-			for(int h = 0; h < aloSubPermutation.size(); h++ ){
-				permutation[j] = aloSubPermutation.get(h);
+			Collections.reverse(aloSubCity_ids);
+			for(int h = 0; h < aloSubCity_ids.size(); h++ ){
+				city_ids[j] = aloSubCity_ids.get(h);
 				j--;
 			}
-			aloSubPermutation.clear();
+			aloSubCity_ids.clear();
 
-			newCost = deltaEvaluation(oSolution,prevPermutation,i,j);
+			newCost = deltaEvaluation(oSolution,prevCity_ids,i,j);
 			oSolution.setObjectiveFunctionValue(newCost);
 
 		}//end for

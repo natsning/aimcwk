@@ -49,23 +49,22 @@ public class PWPInstance implements PWPInstanceInterface {
 	@Override
 	public PWPSolution createSolution(InitialisationMode mode) {
 		
-		//***** do i need to specify if mode == random?
 		// construct a new 'PWPSolution' using RANDOM initialisation
 
 		if(mode == InitialisationMode.RANDOM) {
-			int[] permutation = new int[getNumberOfLocations() - 2];
+			int[] city_ids = new int[getNumberOfLocations() - 2];
 			for (int i = 0; i < getNumberOfLocations() - 2; i++) {
-				permutation[i] = i;
+				city_ids[i] = i;
 			}
 			//random swap
-			for (int i = 0; i < permutation.length; i++) {
-				int randomIndexToSwap = oRandom.nextInt(permutation.length);
-				int temp = permutation[randomIndexToSwap];
-				permutation[randomIndexToSwap] = permutation[i];
-				permutation[i] = temp;
+			for (int i = 0; i < city_ids.length; i++) {
+				int randomIndexToSwap = oRandom.nextInt(city_ids.length);
+				int temp = city_ids[randomIndexToSwap];
+				city_ids[randomIndexToSwap] = city_ids[i];
+				city_ids[i] = temp;
 			}
 
-			SolutionRepresentation solRep = new SolutionRepresentation(permutation);
+			SolutionRepresentation solRep = new SolutionRepresentation(city_ids);
 			return new PWPSolution(solRep, getPWPObjectiveFunction().getObjectiveFunctionValue(solRep));
 		}
 
@@ -110,10 +109,10 @@ public class PWPInstance implements PWPInstanceInterface {
 	public ArrayList<Location> getSolutionAsListOfLocations(PWPSolutionInterface oSolution) {
 
 		//return an 'ArrayList' of ALL LOCATIONS in the solution.
-		int[] permutation = oSolution.getSolutionRepresentation().getSolutionRepresentation();
-		ArrayList<Location> aloLoc = new ArrayList<>(permutation.length);
-		for (int i = 0; i < permutation.length; i++){
-			aloLoc.add(aoLocations[permutation[i]]);
+		int[] city_ids = oSolution.getSolutionRepresentation().getSolutionRepresentation();
+		ArrayList<Location> aloLoc = new ArrayList<>(city_ids.length);
+		for (int i = 0; i < city_ids.length; i++){
+			aloLoc.add(aoLocations[city_ids[i]]);
 		}
 
 		return aloLoc;

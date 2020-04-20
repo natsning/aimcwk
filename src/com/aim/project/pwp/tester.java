@@ -11,13 +11,20 @@ public class tester {
 
     public static void main(String[] args) {
         int[] permutation = {0,1,2,3,4,5,6,7,8,9,10};
-        List<Integer> aloPermutation = new ArrayList<>();
-        for (int i : permutation) {
-            aloPermutation.add(i);
-        }
-        Random r = new Random();
-        int start = r.nextInt(permutation.length);
-        System.out.println(start);
+//        String[] strings = new String[permutation.length+2];
+//        strings[0] = "DEPOT";
+//        strings[strings.length-1]= "HOME";
+//        for(int i=1;i<=permutation.length;i++){
+//            strings[i] = Integer.toString(permutation[i-1]);
+//        }
+//        System.out.println(String.join(" -> ",strings));
+//        List<Integer> aloPermutation = new ArrayList<>();
+//        for (int i : permutation) {
+//            aloPermutation.add(i);
+//        }
+//        Random r = new Random();
+//        int start = r.nextInt(permutation.length);
+//        System.out.println(start);
         // test delta evaluation
 //        int[] prev = new int[permutation.length];
 //        System.arraycopy(permutation,0,prev,0,permutation.length);
@@ -100,9 +107,9 @@ public class tester {
 //            }
 //
 //        }//end for
-        for(int i=start; i<permutation.length+start ; i++){
-            System.out.println(permutation[i%permutation.length]);
-        }
+//        for(int i=start; i<permutation.length+start ; i++){
+//            System.out.println(permutation[i%permutation.length]);
+//        }
 
 
     }

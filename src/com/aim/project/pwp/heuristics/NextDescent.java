@@ -31,27 +31,27 @@ public class NextDescent extends HeuristicOperators implements HeuristicInterfac
 		int times = (int)Math.floor(dDepthOfSearch/ 0.2) + 1;
 		int start = oRandom.nextInt(oSolution.getNumberOfLocations());
 		int index = start;
-		int[] permutation = oSolution.getSolutionRepresentation().getSolutionRepresentation();
-		int[] prevPermutation = oSolution.clone().getSolutionRepresentation().getSolutionRepresentation();
+		int[] city_ids = oSolution.getSolutionRepresentation().getSolutionRepresentation();
+		int[] prevCity_ids = oSolution.clone().getSolutionRepresentation().getSolutionRepresentation();
 		int indexToSwap,adjacentIndex;
 
-		while(times>0 || index<permutation.length+start){
+		while(times!=0 && index<city_ids.length+start){
 
-			indexToSwap = index % permutation.length;
-			adjacentIndex = (index+1) % permutation.length;
-			swap(permutation,indexToSwap,adjacentIndex);
+			indexToSwap = index % city_ids.length;
+			adjacentIndex = (index+1) % city_ids.length;
+			swap(city_ids,indexToSwap,adjacentIndex);
 
-			newCost = deltaEvaluation(oSolution,prevPermutation,indexToSwap);
+			newCost = deltaEvaluation(oSolution,prevCity_ids,indexToSwap);
 			if(newCost < originalCost ){ //IO
 				//accept
 				oSolution.setObjectiveFunctionValue(newCost);
 				originalCost = newCost;
 				times --;
-				prevPermutation = oSolution.clone().getSolutionRepresentation().getSolutionRepresentation();;
+				prevCity_ids = oSolution.clone().getSolutionRepresentation().getSolutionRepresentation();;
 
 			}else{
 				//reject
-				swap(permutation,adjacentIndex,indexToSwap);
+				swap(city_ids,adjacentIndex,indexToSwap);
 			}
 
 			index++;

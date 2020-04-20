@@ -32,27 +32,27 @@ public class DavissHillClimbing extends HeuristicOperators implements HeuristicI
 		int indexToSwap,adjacentIndex;
 		double newCost = 0;
 		double originalCost = oSolution.getObjectiveFunctionValue();
-		int[] permutation = oSolution.getSolutionRepresentation().getSolutionRepresentation();
-		int[] prevPermutation = oSolution.clone().getSolutionRepresentation().getSolutionRepresentation();
-		int[] sequenceToSwap = createSequenceToSwap(permutation.length, oRandom);
+		int[] city_ids = oSolution.getSolutionRepresentation().getSolutionRepresentation();
+		int[] prevCity_ids = oSolution.clone().getSolutionRepresentation().getSolutionRepresentation();
+		int[] sequenceToSwap = createSequenceToSwap(city_ids.length, oRandom);
 
-		while(times!=0||index<permutation.length){
+		while(times!=0||index<city_ids.length){
 
 			indexToSwap = sequenceToSwap[index];
-			adjacentIndex = (indexToSwap+1) % permutation.length;
-			swap(permutation,indexToSwap,adjacentIndex);
+			adjacentIndex = (indexToSwap+1) % city_ids.length;
+			swap(city_ids,indexToSwap,adjacentIndex);
 
-			newCost = deltaEvaluation(oSolution,prevPermutation,indexToSwap);
+			newCost = deltaEvaluation(oSolution,prevCity_ids,indexToSwap);
 			if(newCost <= originalCost ){ //IO
 				//accept
 				oSolution.setObjectiveFunctionValue(newCost);
 				originalCost = newCost;
 				times --;
-				prevPermutation = oSolution.clone().getSolutionRepresentation().getSolutionRepresentation();;
+				prevCity_ids = oSolution.clone().getSolutionRepresentation().getSolutionRepresentation();;
 
 			}else{
 				//reject
-				swap(permutation,adjacentIndex,indexToSwap);
+				swap(city_ids,adjacentIndex,indexToSwap);
 			}
 			index++;
 		}

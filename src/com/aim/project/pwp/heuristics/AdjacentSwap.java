@@ -23,7 +23,7 @@ public class AdjacentSwap extends HeuristicOperators implements HeuristicInterfa
 	public double apply( PWPSolutionInterface oSolution, double depthOfSearch, double intensityOfMutation) {
 
 		int intensity = (int)Math.pow(2,Math.floor(intensityOfMutation/0.2));
-		int[] permutation = oSolution.getSolutionRepresentation().getSolutionRepresentation();
+		int[] city_ids = oSolution.getSolutionRepresentation().getSolutionRepresentation();
 		int[] prevPermutation;
 		int indexToSwap,adjacentIndex;
 		double newCost = 0;
@@ -32,9 +32,9 @@ public class AdjacentSwap extends HeuristicOperators implements HeuristicInterfa
 
 			prevPermutation = oSolution.clone().getSolutionRepresentation().getSolutionRepresentation();
 
-			indexToSwap = oRandom.nextInt(permutation.length);
-			adjacentIndex = (indexToSwap + 1) % permutation.length;
-			swap(permutation,indexToSwap,adjacentIndex);
+			indexToSwap = oRandom.nextInt(city_ids.length);
+			adjacentIndex = (indexToSwap + 1) % city_ids.length;
+			swap(city_ids,indexToSwap,adjacentIndex);
 
 			newCost= deltaEvaluation(oSolution,prevPermutation,indexToSwap);
 			oSolution.setObjectiveFunctionValue(newCost);

@@ -31,17 +31,17 @@ public class CX implements XOHeuristicInterface {
 
 	@Override
 	public boolean isCrossover() {
-
+		return true;
 	}
 
 	@Override
 	public boolean usesIntensityOfMutation() {
-
+		return true;
 	}
 
 	@Override
 	public boolean usesDepthOfSearch() {
-
+		return false;
 	}
 
 

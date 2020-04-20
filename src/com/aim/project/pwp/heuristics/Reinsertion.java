@@ -23,26 +23,26 @@ public class Reinsertion extends HeuristicOperators implements HeuristicInterfac
 	public double apply(PWPSolutionInterface oSolution, double depthOfSearch, double intensityOfMutation) {
 		int times = (int)Math.floor(intensityOfMutation / 0.2) + 1;
 		double newCost = 0;
-		int[] permutation = oSolution.getSolutionRepresentation().getSolutionRepresentation();
-		int[] prevPermutation;
-		ArrayList<Integer> aloPermutation = new ArrayList<>();
-		for (int i : permutation)
-			aloPermutation.add(i);
+		int[] city_ids = oSolution.getSolutionRepresentation().getSolutionRepresentation();
+		int[] prevCity_ids;
+		ArrayList<Integer> aloCity_ids = new ArrayList<>();
+		for (int i : city_ids)
+			aloCity_ids.add(i);
 
 		for(int k = 0; k<times ; k++){
 
-			int[] pair = chooseTwo(permutation.length,oRandom);
+			int[] pair = chooseTwo(city_ids.length,oRandom);
 			int i = pair[0], j = pair[1];
 
-			Integer removed = aloPermutation.get(i);
-			aloPermutation.remove(i);
-			aloPermutation.add(j,removed);
+			Integer removed = aloCity_ids.get(i);
+			aloCity_ids.remove(i);
+			aloCity_ids.add(j,removed);
 
-			prevPermutation = oSolution.clone().getSolutionRepresentation().getSolutionRepresentation();
-			for(int h=0 ; h<aloPermutation.size(); h++) {
-				permutation[h] = aloPermutation.get(h);
+			prevCity_ids = oSolution.clone().getSolutionRepresentation().getSolutionRepresentation();
+			for(int h=0 ; h<aloCity_ids.size(); h++) {
+				city_ids[h] = aloCity_ids.get(h);
 			}
-			newCost = deltaEvaluation(oSolution,prevPermutation,i,j);
+			newCost = deltaEvaluation(oSolution,prevCity_ids,i,j);
 			oSolution.setObjectiveFunctionValue(newCost);
 
 		}
