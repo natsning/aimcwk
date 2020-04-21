@@ -41,10 +41,8 @@ public class InversionMutation extends HeuristicOperators implements HeuristicIn
 			for (int h = i; h <= j; h++ ){
 				aloSubCity_ids.add(city_ids[h]);
 			}
-			Collections.reverse(aloSubCity_ids);
 			for(int h = 0; h < aloSubCity_ids.size(); h++ ){
-				city_ids[j] = aloSubCity_ids.get(h);
-				j--;
+				city_ids[j-h] = aloSubCity_ids.get(h);
 			}
 			aloSubCity_ids.clear();
 

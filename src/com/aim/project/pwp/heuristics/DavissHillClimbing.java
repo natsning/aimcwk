@@ -36,7 +36,7 @@ public class DavissHillClimbing extends HeuristicOperators implements HeuristicI
 		int[] prevCity_ids = oSolution.clone().getSolutionRepresentation().getSolutionRepresentation();
 		int[] sequenceToSwap = createSequenceToSwap(city_ids.length, oRandom);
 
-		while(times!=0||index<city_ids.length){
+		while(times!=0 && index<city_ids.length){
 
 			indexToSwap = sequenceToSwap[index];
 			adjacentIndex = (indexToSwap+1) % city_ids.length;

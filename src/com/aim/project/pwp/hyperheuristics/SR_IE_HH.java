@@ -22,22 +22,22 @@ public class SR_IE_HH extends HyperHeuristic {
 		
 		oProblem.initialiseSolution(0);
 		double current = oProblem.getFunctionValue(0);
-		
+
 		oProblem.setIntensityOfMutation(0.2);
 		oProblem.setDepthOfSearch(0.2);
-		
-		int h = 1;
+
+		int h;
 		long iteration = 0;
 		boolean accept;
 		System.out.println("Iteration\tf(s)\tf(s')\tAccept");
 
 		while(!hasTimeExpired() ) {
-			
+
 			h = rng.nextInt(oProblem.getNumberOfHeuristics());
-			
+
 			double candidate;
 			if(h < 5) {
-				candidate = oProblem.applyHeuristic(h, 0, 1);
+				candidate = oProblem.applyHeuristic(4, 0, 1);
 			} else {
 				oProblem.initialiseSolution(2);
 				candidate = oProblem.applyHeuristic(h, 0, 2, 1);
@@ -45,14 +45,12 @@ public class SR_IE_HH extends HyperHeuristic {
 			
 			accept = candidate <= current;
 			if(accept) {
-				
 				oProblem.copySolution(1, 0);
 				current = candidate;
 			}
-			
 			iteration++;
 		}
-		
+
 		PWPSolutionInterface oSolution = ((AIM_PWP) oProblem).getBestSolution();
 		SolutionPrinter oSP = new SolutionPrinter("out.csv");
 		oSP.printSolution( ((AIM_PWP) oProblem).oInstance.getSolutionAsListOfLocations(oSolution));

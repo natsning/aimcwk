@@ -16,13 +16,13 @@ public class PWPObjectiveFunction implements ObjectiveFunctionInterface {
 
 	@Override
 	public double getObjectiveFunctionValue(SolutionRepresentationInterface oSolution) {
-		int[] permutation = oSolution.getSolutionRepresentation();
-		double totalCost = 0;
+		int[] city_ids = oSolution.getSolutionRepresentation();
+		double totalCost;
 
-		totalCost = getCostBetweenDepotAnd(0) + getCostBetweenHomeAnd(permutation.length-1);
+		totalCost = getCostBetweenDepotAnd(city_ids[0]) + getCostBetweenHomeAnd(city_ids[city_ids.length-1]);
 		// sum up all the costs between the depot addresses
-		for(int i = 0; i<permutation.length-1; i++){
-			totalCost += getCost(i,i+1) ;
+		for(int i = 0; i<city_ids.length-1; i++){
+			totalCost += getCost(city_ids[i],city_ids[i+1]) ;
 		}
 
 		return totalCost;
@@ -54,6 +54,6 @@ public class PWPObjectiveFunction implements ObjectiveFunctionInterface {
 
 	private double getEuclideanDistance(double x, double y){
 		// sqrt (x^2 + y^2)
-		return Math.sqrt( Math.pow(x,2) + Math.pow(y,2));
+		return Math.sqrt( Math.pow(Math.abs(x),2) + Math.pow(Math.abs(y),2));
 	}
 }

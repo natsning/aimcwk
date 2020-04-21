@@ -7,50 +7,50 @@ public class tester {
 
 
     public static void main(String[] args) {
-        int[] permA = {0,1,2,3,4,5,6,7,8,9};
-        int[] oriA = {0,1,2,3,4,5,6,7,8,9};
-        int[] permB = {3,7,5,9,0,1,4,2,6,8};
-        int[] oriB = {3,7,5,9,0,1,4,2,6,8};
-        int length = permA.length;
+        int[] permutation = {70,80,95,115,140};
+        int length = permutation.length;
+        int lastIndex = length-1;
         Random r = new Random();
-        int times =2;
-        int i,j,temp,indexA,indexB;
-        Set<Integer> setA = new HashSet<>();
-        Set<Integer> setB = new HashSet<>();
-//        int start = r.nextInt(permutation.length);
-//        System.out.println(start);
+        int i,j;
+        int oriCost = 150; //depot 20, home 170
+        int newCost = 0;
         // test delta evaluation
-//        int[] prev = new int[permutation.length];
-//        System.arraycopy(permutation,0,prev,0,permutation.length);
-//
-//        int lastIndex = prev.length-1;
-//        int indexToSwap,adjacentIndex,temp;
-//
-//        for (int q = 0 ; q < 4 ; q++){
-//            indexToSwap = r.nextInt(permutation.length);
-//            adjacentIndex = (indexToSwap + 1) % permutation.length;
-//            temp = permutation[indexToSwap];
-//            permutation[indexToSwap] = permutation[adjacentIndex];
-//            permutation[adjacentIndex] = temp;
-//
-//            System.out.println(" old");
-//            for(int i : prev) {
-//                System.out.printf("%d ",i);
-//            }
-//            System.arraycopy(permutation,0,prev,0,permutation.length);
-//        }
-//        int oriCost = (70-20) + (80-70) + (94-80) + (95-94) + (120-95); //depot 20, home 120
-//        int newCost = 0;
-//        for(int i : permutation) {
-//            System.out.printf("%d ",i);
-//        }
-//        if(indexToSwap == lastIndex){
-//            newCost = oriCost
-//                    - Math.abs(120-prev[lastIndex]) - Math.abs(prev[0]-20)
-//                    - Math.abs(prev[1]-prev[0]) -Math.abs(prev[lastIndex]-prev[lastIndex-1])
-//                    + Math.abs(120-permutation[lastIndex]) + Math.abs(permutation[0]-20)
-//                    + Math.abs(permutation[1]-permutation[0]) + Math.abs(permutation[lastIndex]-permutation[lastIndex-1]);
-//        }
+        int[] prev = new int[length];
+        System.arraycopy(permutation,0,prev,0,length);
+        ArrayList<Integer> aloCity_ids = new ArrayList<>();
+        for (int k : permutation)
+            aloCity_ids.add(k);
+
+        i = 3; j = 1;
+
+        Integer removed = aloCity_ids.get(i);
+        aloCity_ids.remove(i);
+        aloCity_ids.add(j,removed);
+        System.out.print(" 20");
+        for(int k =0; k<length; k++ ) {
+            permutation[k] = aloCity_ids.get(k);
+            System.out.printf(" %d",permutation[k]);
+        }
+        System.out.print(" 170");
+
+
+        newCost = oriCost
+                - Math.abs(prev[i]-prev[i-1]) - Math.abs(prev[i]-prev[i+1])
+                - Math.abs(prev[j]-prev[j-1])
+                + Math.abs(permutation[j]-permutation[j-1]) + Math.abs(permutation[j]-permutation[j+1])
+                + Math.abs(permutation[i+1]-permutation[i]);
+
+        int check = 0;
+        for(int k =0; k<length-1; k++){
+            check += Math.abs(permutation[k]-permutation[k+1]);
+        }
+        check += fromDepot(permutation[0]) + toHome(permutation[lastIndex]);
+
+
+
+//                toHome(permutation[i]);
+
+        System.out.printf("\n%d   %d",newCost,check);
 //        else if(indexToSwap == 0){
 //            newCost = oriCost - Math.abs(prev[0]-20) - Math.abs(prev[1]-prev[2])
 //                    + Math.abs(permutation[0]-20) + Math.abs(permutation[1]-permutation[2]);
@@ -109,39 +109,13 @@ public class tester {
 //            for(int k: permB){
 //                System.out.printf(" %d",k);
 //            }
+    }
+        private static int fromDepot(int x){
+            return Math.abs(x-20);
         }
-
-//            for (int h = i; h <= j; h++) {
-//                aloPermutation.add(permutation[h]);
-//            }
-//            Collections.reverse(aloPermutation);
-//            for (int h = 0; h < aloPermutation.size(); h++) {
-//                permutation[i] = aloPermutation.get(h);
-//                i++;
-//            }
-//            aloPermutation.clear();
-//
-//            for(int h=0 ; h<aloPermutation.size(); h++) {
-//                permutation[h] = aloPermutation.get(h);
-//                System.out.printf("%d ", permutation[h]);
-//            }
-//
-//        }//end for
-//            else {
-//                System.out.printf("permB[%d]: %d is in setB thus not added to permS[%d]\n",
-//                        index % 10, permA[index % 10], indexA % 10);
-//            }
-//        System.out.println("0,1,2,3,4,5,6,7,8,9");
-//        System.out.println("3,7,5,9,0,1,4,2,6,8");
-
-//        System.out.println(' ');
-//        for(int k: setA){
-//            System.out.printf(" %d",k);
-//        }
-//        System.out.println(' ');
-//        for(int k: setB){
-//            System.out.printf(" %d",k);
-//        }
+        private static int toHome(int x){
+            return Math.abs(x-170);
+        }
 }
     //cd Y2S2-AIM/cw/cwk/src/com/aim/project/pwp
 //  javac tester.java

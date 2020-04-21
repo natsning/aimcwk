@@ -24,7 +24,7 @@ public class AIM_PWP extends ProblemDomain implements Visualisable {
 	
 	private PWPSolutionInterface[] aoMemoryOfSolutions;
 	
-	public PWPSolutionInterface oBestSolution;
+	public PWPSolutionInterface oBestSolution = null;
 	
 	public PWPInstanceInterface oInstance;
 	
@@ -32,7 +32,8 @@ public class AIM_PWP extends ProblemDomain implements Visualisable {
 	
 	private ObjectiveFunctionInterface oObjectiveFunction;
 	
-	private final long seed;
+//	private final long seed;
+	private long seed;
 		
 	public AIM_PWP(long seed) {
 		
@@ -87,12 +88,12 @@ public class AIM_PWP extends ProblemDomain implements Visualisable {
 		copySolution(parent1Index,candidateIndex);
 
 		if( (aoHeuristics[hIndex].isCrossover()) ) { //if it is crossover
-			XOHeuristicInterface heuristic = aoHeuristics[hIndex];
-			double newObjVal = heuristic.apply(getSolution(parent1Index), getSolution(parent2Index),getSolution(candidateIndex)
-												depthOfSearch, intensityOfMutation);
-			if (newObjVal < getBestSolutionValue()) {
-				updateBestSolution(candidateIndex);
-			}
+//			HeuristicInterface heuristic = (XOHeuristicInterface) aoHeuristics[hIndex];
+//			double newObjVal = heuristic.apply(getSolution(parent1Index), getSolution(parent2Index),getSolution(candidateIndex),
+//												depthOfSearch, intensityOfMutation);
+//			if (newObjVal < getBestSolutionValue()) {
+//				updateBestSolution(candidateIndex);
+//			}
 		}
 		return getSolution(candidateIndex).getObjectiveFunctionValue();
 	}
@@ -141,9 +142,9 @@ public class AIM_PWP extends ProblemDomain implements Visualisable {
 		}
 		else if(type == HeuristicType.RUIN_RECREATE){
 
-			return
+			return new int[]{};
 		}else{
-			return
+			return new int[]{};
 		}
 		
 	}
@@ -167,7 +168,7 @@ public class AIM_PWP extends ProblemDomain implements Visualisable {
 		// return the array of heuristic IDs that use intensity of mutation.
 		ArrayList<Integer> arrayList = new ArrayList<>();
 		for(int i=0; i<aoHeuristics.length; i++){
-			if(aoHeuristics[i].usesIntensityOfMutation())){
+			if(aoHeuristics[i].usesIntensityOfMutation()){
 				arrayList.add(i);
 			}
 		}
@@ -202,20 +203,20 @@ public class AIM_PWP extends ProblemDomain implements Visualisable {
 	@Override
 	public int getNumberOfInstances() {
 
-		// TODO return the number of available instances
+		// return the number of available instances
 		return instanceFiles.length;
 	}
 
 	@Override
 	public void initialiseSolution(int index) {
 		
-		// TODO - initialise a solution in index 'index' 
+		//  initialise a solution in index 'index'
 		// 		making sure that you also update the best solution!
 		aoMemoryOfSolutions[index]= oInstance.createSolution(InitialisationMode.RANDOM);
-		if(getSolution(index).getObjectiveFunctionValue() < getBestSolutionValue()){
+		if(oBestSolution == null || getSolution(index).getObjectiveFunctionValue() < getBestSolutionValue()){
 			updateBestSolution(index);
 		}
-		
+
 	}
 
 	// implement the instance reader that this method uses
@@ -247,8 +248,11 @@ public class AIM_PWP extends ProblemDomain implements Visualisable {
 		//		the first 'size' solutions are copied to the new memory.
 		if(size>2){
 			PWPSolutionInterface[] newArray = new PWPSolutionInterface[size];
-			for(int i=0; i<size; i++){
-				newArray[i] = getSolution(i).clone();
+			int limit = aoMemoryOfSolutions.length < size? aoMemoryOfSolutions.length : size;
+			for(int i=0; i<limit; i++){
+				if(getSolution(i)!=null){
+					newArray[i] = getSolution(i).clone();
+				}
 			}
 			aoMemoryOfSolutions = newArray;
 		}

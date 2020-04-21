@@ -29,13 +29,13 @@ public class NextDescent extends HeuristicOperators implements HeuristicInterfac
 		double newCost = 0;
 		double originalCost = oSolution.getObjectiveFunctionValue();
 		int times = (int)Math.floor(dDepthOfSearch/ 0.2) + 1;
-		int start = oRandom.nextInt(oSolution.getNumberOfLocations());
-		int index = start;
+		int offset = oRandom.nextInt(oSolution.getNumberOfLocations());
+		int index = offset;
 		int[] city_ids = oSolution.getSolutionRepresentation().getSolutionRepresentation();
 		int[] prevCity_ids = oSolution.clone().getSolutionRepresentation().getSolutionRepresentation();
 		int indexToSwap,adjacentIndex;
 
-		while(times!=0 && index<city_ids.length+start){
+		while(times!=0 && index<city_ids.length+offset){
 
 			indexToSwap = index % city_ids.length;
 			adjacentIndex = (index+1) % city_ids.length;
@@ -47,7 +47,8 @@ public class NextDescent extends HeuristicOperators implements HeuristicInterfac
 				oSolution.setObjectiveFunctionValue(newCost);
 				originalCost = newCost;
 				times --;
-				prevCity_ids = oSolution.clone().getSolutionRepresentation().getSolutionRepresentation();;
+				prevCity_ids = oSolution.clone().getSolutionRepresentation().getSolutionRepresentation();
+				offset = index;
 
 			}else{
 				//reject

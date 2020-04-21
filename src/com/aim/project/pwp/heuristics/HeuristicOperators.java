@@ -68,8 +68,8 @@ public class HeuristicOperators {
 		}
 		else if(i == lastIndex-1){ //if second last and last are swapped
 			newCost = original
-					- objFunc.getCostBetweenHomeAnd(prev[lastIndex]) - objFunc.getCost(prev[lastIndex-2],prev[lastIndex-1])
-					+ objFunc.getCostBetweenHomeAnd(current[lastIndex]) + objFunc.getCost(current[lastIndex-2],prev[lastIndex-1]);
+					- objFunc.getCostBetweenHomeAnd(prev[lastIndex]) - objFunc.getCost(prev[i-1],prev[i])
+					+ objFunc.getCostBetweenHomeAnd(current[lastIndex]) + objFunc.getCost(current[i-1],current[i]);
 		}
 		else{
 			newCost = original

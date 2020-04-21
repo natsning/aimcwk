@@ -5,3 +5,4 @@
 *.class
 ExampleHyperHeuristic1.java
 ExampleHyperHeuristic2.java
+*.csv

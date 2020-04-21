@@ -6,6 +6,7 @@ import java.util.Random;
 import com.aim.project.pwp.interfaces.HeuristicInterface;
 import com.aim.project.pwp.interfaces.ObjectiveFunctionInterface;
 import com.aim.project.pwp.interfaces.PWPSolutionInterface;
+import com.aim.project.pwp.solution.SolutionRepresentation;
 
 
 public class Reinsertion extends HeuristicOperators implements HeuristicInterface {
@@ -43,10 +44,10 @@ public class Reinsertion extends HeuristicOperators implements HeuristicInterfac
 				city_ids[h] = aloCity_ids.get(h);
 			}
 			newCost = deltaEvaluation(oSolution,prevCity_ids,i,j);
+			System.out.printf("index %d&%d, times %d, diff %f\n",i,j,k,newCost-getoObjectiveFunction().getObjectiveFunctionValue(oSolution.getSolutionRepresentation()));
 			oSolution.setObjectiveFunctionValue(newCost);
 
 		}
-
 		return  newCost;
 	}
 
@@ -76,22 +77,22 @@ public class Reinsertion extends HeuristicOperators implements HeuristicInterfac
             newCost = original
                     - objFunc.getCostBetweenDepotAnd(prev[i]) - objFunc.getCost(prev[i],prev[i+1])
                     - objFunc.getCostBetweenHomeAnd(prev[j])
-                    + objFunc.getCost(current[j],current[j-1]) + objFunc.getCostBetweenHomeAnd(current[j])
-                    + objFunc.getCostBetweenDepotAnd(current[i]);
+                    + objFunc.getCostBetweenDepotAnd(current[i])
+					+ objFunc.getCost(current[j],current[j-1]) + objFunc.getCostBetweenHomeAnd(current[j]);
         }
         else if(i == lastIndex && j==0){ //if tail is reinserted to head
             newCost = original
-                    - objFunc.getCost(prev[i],prev[i-1]) - objFunc.getCostBetweenHomeAnd(prev[i])
                     - objFunc.getCostBetweenDepotAnd(prev[j])
+                    - objFunc.getCost(prev[i],prev[i-1]) - objFunc.getCostBetweenHomeAnd(prev[i])
                     + objFunc.getCostBetweenDepotAnd(current[j]) + objFunc.getCost(current[j],current[j+1])
-                    + objFunc.getCostBetweenDepotAnd(current[i]);
+                    + objFunc.getCostBetweenHomeAnd(current[i]);
         }
         else if(i == 0){ //if head is reinserted to middle
             newCost = original
                     - objFunc.getCostBetweenDepotAnd(prev[i]) - objFunc.getCost(prev[i],prev[i+1])
                     - objFunc.getCost(prev[j],prev[j+1])
-                    + objFunc.getCost(current[j-1],current[j]) + objFunc.getCost(current[j],current[j+1])
-                    + objFunc.getCostBetweenDepotAnd(current[i]);
+                    + objFunc.getCostBetweenDepotAnd(current[i])
+                    + objFunc.getCost(current[j-1],current[j]) + objFunc.getCost(current[j],current[j+1]);
         }
         else if(i == lastIndex){ //if tail is reinserted to middle
             newCost = original
@@ -102,8 +103,8 @@ public class Reinsertion extends HeuristicOperators implements HeuristicInterfac
 
         }else if(j==0){ //if middle is reinserted to head
             newCost = original
-                    - objFunc.getCost(prev[i],prev[i-1]) - objFunc.getCost(prev[i],prev[i+1])
                     - objFunc.getCostBetweenDepotAnd(prev[j])
+                    - objFunc.getCost(prev[i],prev[i-1]) - objFunc.getCost(prev[i],prev[i+1])
                     + objFunc.getCostBetweenDepotAnd(current[j]) + objFunc.getCost(current[j],current[j+1])
                     + objFunc.getCost(current[i],current[i+1]);
 
@@ -111,22 +112,23 @@ public class Reinsertion extends HeuristicOperators implements HeuristicInterfac
             newCost = original
                     - objFunc.getCost(prev[i],prev[i-1]) - objFunc.getCost(prev[i],prev[i+1])
                     - objFunc.getCostBetweenHomeAnd(prev[j])
-                    + objFunc.getCost(current[j],current[j-1]) + objFunc.getCostBetweenHomeAnd(current[j])
-                    + objFunc.getCost(current[i-1],current[i]);
+                    + objFunc.getCost(current[i-1],current[i])
+                    + objFunc.getCost(current[j],current[j-1]) + objFunc.getCostBetweenHomeAnd(current[j]);
 
-        }else if(i>j){ //if middle is reinserted to somewhere behind but before tail
-            newCost = original
-                    - objFunc.getCost(prev[i],prev[i-1]) - objFunc.getCost(prev[i],prev[i+1])
-                    - objFunc.getCost(prev[j],prev[j+1])
-                    + objFunc.getCost(current[j-1],current[j]) + objFunc.getCost(current[j],current[j+1])
-                    + objFunc.getCost(current[i-1],current[i]);
-
-        }else{ //if middle is reinserted to somewhere in the front but after head
+        }else if(i>j){ //if middle is reinserted to somewhere in the front but after head
             newCost = original
                     - objFunc.getCost(prev[i],prev[i-1]) - objFunc.getCost(prev[i],prev[i+1])
                     - objFunc.getCost(prev[j],prev[j-1])
                     + objFunc.getCost(current[j-1],current[j]) + objFunc.getCost(current[j],current[j+1])
                     + objFunc.getCost(current[i],current[i+1]);
+
+        }else{ //if middle is reinserted to somewhere behind but before tail
+            newCost = original
+                    - objFunc.getCost(prev[i],prev[i-1]) - objFunc.getCost(prev[i],prev[i+1])
+                    - objFunc.getCost(prev[j],prev[j+1])
+                    + objFunc.getCost(current[j-1],current[j]) + objFunc.getCost(current[j],current[j+1])
+                    + objFunc.getCost(current[i],current[i-1]);
+
         }
 
         return newCost;
