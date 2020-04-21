@@ -14,7 +14,8 @@ public interface XOHeuristicInterface extends HeuristicInterface {
 	 * @param dDepthOfSearch       current DOS setting
 	 * @param dIntensityOfMutation currentIOM setting
 	 */
-	public double apply(PWPSolutionInterface oParent1, PWPSolutionInterface oParent2, PWPSolutionInterface oChild,
+	public double apply(PWPSolutionInterface oParent1, PWPSolutionInterface oParent2,
+						PWPSolutionInterface oChild,
 			double dDepthOfSearch, double dIntensityOfMutation);
 
 }

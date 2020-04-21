@@ -12,11 +12,7 @@ import com.aim.project.pwp.heuristics.*;
 import com.aim.project.pwp.instance.InitialisationMode;
 import com.aim.project.pwp.instance.Location;
 import com.aim.project.pwp.instance.reader.PWPInstanceReader;
-import com.aim.project.pwp.interfaces.HeuristicInterface;
-import com.aim.project.pwp.interfaces.ObjectiveFunctionInterface;
-import com.aim.project.pwp.interfaces.PWPInstanceInterface;
-import com.aim.project.pwp.interfaces.PWPSolutionInterface;
-import com.aim.project.pwp.interfaces.Visualisable;
+import com.aim.project.pwp.interfaces.*;
 
 import AbstractClasses.ProblemDomain;
 
@@ -72,12 +68,15 @@ public class AIM_PWP extends ProblemDomain implements Visualisable {
 		// apply heuristic and return the objective value of the candidate solution
 		//			remembering to keep track/update the best solution
 		copySolution(currentIndex,candidateIndex);
-		double newObjVal = aoHeuristics[hIndex].apply(getSolution(candidateIndex),depthOfSearch,intensityOfMutation);
 
-		if(newObjVal<getBestSolutionValue()){
-			updateBestSolution(candidateIndex);
+		if(!aoHeuristics[hIndex].isCrossover()) { //if it's not crossover
+
+			double newObjVal = aoHeuristics[hIndex].apply(getSolution(candidateIndex), depthOfSearch, intensityOfMutation);
+			if (newObjVal < getBestSolutionValue()) {
+				updateBestSolution(candidateIndex);
+			}
 		}
-		return newObjVal;
+		return getSolution(candidateIndex).getObjectiveFunctionValue();
 	}
 
 	@Override
@@ -85,7 +84,17 @@ public class AIM_PWP extends ProblemDomain implements Visualisable {
 		
 		// TODO - apply heuristic and return the objective value of the candidate solution
 		//			remembering to keep track/update the best solution
+		copySolution(parent1Index,candidateIndex);
 
+		if( (aoHeuristics[hIndex].isCrossover()) ) { //if it is crossover
+			XOHeuristicInterface heuristic = aoHeuristics[hIndex];
+			double newObjVal = heuristic.apply(getSolution(parent1Index), getSolution(parent2Index),getSolution(candidateIndex)
+												depthOfSearch, intensityOfMutation);
+			if (newObjVal < getBestSolutionValue()) {
+				updateBestSolution(candidateIndex);
+			}
+		}
+		return getSolution(candidateIndex).getObjectiveFunctionValue();
 	}
 
 	@Override
@@ -236,11 +245,13 @@ public class AIM_PWP extends ProblemDomain implements Visualisable {
 		//		the existing solutions should be copied to the new memory at the same indices.
 		// IF the memory size is DECREASED, then
 		//		the first 'size' solutions are copied to the new memory.
-		PWPSolutionInterface[] newArray = new PWPSolutionInterface[size];
-		for(int i=0; i<size; i++){
-			newArray[i] = getSolution(i).clone();
+		if(size>2){
+			PWPSolutionInterface[] newArray = new PWPSolutionInterface[size];
+			for(int i=0; i<size; i++){
+				newArray[i] = getSolution(i).clone();
+			}
+			aoMemoryOfSolutions = newArray;
 		}
-		aoMemoryOfSolutions = newArray;
 	}
 
 	@Override

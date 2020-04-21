@@ -20,13 +20,14 @@ public class CX implements XOHeuristicInterface {
 
 	@Override
 	public double apply(PWPSolutionInterface solution, double depthOfSearch, double intensityOfMutation) {
-
+		return solution.getObjectiveFunctionValue();
 	}
 
 	@Override
 	public double apply(PWPSolutionInterface p1, PWPSolutionInterface p2,
 			PWPSolutionInterface c, double depthOfSearch, double intensityOfMutation) {
-		
+		double newCost = 0;
+		return newCost;
 	}
 
 	@Override

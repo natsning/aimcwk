@@ -110,10 +110,12 @@ public class PWPInstance implements PWPInstanceInterface {
 
 		//return an 'ArrayList' of ALL LOCATIONS in the solution.
 		int[] city_ids = oSolution.getSolutionRepresentation().getSolutionRepresentation();
-		ArrayList<Location> aloLoc = new ArrayList<>(city_ids.length);
+		ArrayList<Location> aloLoc = new ArrayList<>(getNumberOfLocations());
+		aloLoc.add(oPostalDepotLocation);
 		for (int i = 0; i < city_ids.length; i++){
 			aloLoc.add(aoLocations[city_ids[i]]);
 		}
+		aloLoc.add(oHomeAddressLocation);
 
 		return aloLoc;
 	}
