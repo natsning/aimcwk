@@ -33,18 +33,18 @@ public class PWPInstanceReader implements PWPInstanceReaderInterface {
             while ((st = bfr.readLine()) != null) {
                 if (st.startsWith("POSTAL_OFFICE")) {
                     st2 = bfr.readLine();
-                    aoSt = st2.split(" ");
+                    aoSt = splitter(st2);
                     numLoc++;
                     postalLoc = new Location(Double.parseDouble(aoSt[0]), Double.parseDouble(aoSt[1]));
 
                 } else if (st.startsWith("WORKER_ADDRESS")) {
                     st2 = bfr.readLine();
-                    aoSt = st2.split(" ");
+                    aoSt = splitter(st2);
                     homeLoc = new Location(Double.parseDouble(aoSt[0]), Double.parseDouble(aoSt[1]));
                     numLoc++;
 
-                } else if (Character.isDigit(st.charAt(0))) {
-                    aoSt = st.split(" ");
+                } else if (Character.isDigit(st.charAt(0))|| Character.isDigit(st.charAt(1))) {
+                    aoSt = splitter(st);
                     numLoc++;
                     aloLoc.add(new Location(Double.parseDouble(aoSt[0]), Double.parseDouble(aoSt[1]) ));
 
@@ -61,4 +61,13 @@ public class PWPInstanceReader implements PWPInstanceReaderInterface {
 		return instance;
 
 	}
+
+	private String[] splitter(String str ){
+	    String[] aoStr;
+	    aoStr = str.split("\\t");
+	    if(aoStr.length!=2){
+            aoStr = str.split(" ");
+        }
+	    return  aoStr;
+    }
 }

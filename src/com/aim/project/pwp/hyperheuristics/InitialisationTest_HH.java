@@ -21,6 +21,7 @@ public class InitialisationTest_HH extends HyperHeuristic {
 	protected void solve(ProblemDomain problem) {
 
 		problem.initialiseSolution(0);
+		System.out.print(problem.bestSolutionToString());
 		hasTimeExpired();
 	}
 

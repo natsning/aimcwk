@@ -26,7 +26,7 @@ public class SR_IE_HH extends HyperHeuristic {
 		oProblem.setIntensityOfMutation(0.2);
 		oProblem.setDepthOfSearch(0.2);
 
-		int h;
+		int h = 1;
 		long iteration = 0;
 		boolean accept;
 		System.out.println("Iteration\tf(s)\tf(s')\tAccept");

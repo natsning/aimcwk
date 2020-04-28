@@ -83,17 +83,17 @@ public class AIM_PWP extends ProblemDomain implements Visualisable {
 	@Override
 	public double applyHeuristic(int hIndex, int parent1Index, int parent2Index, int candidateIndex) {
 		
-		// TODO - apply heuristic and return the objective value of the candidate solution
+		// apply heuristic and return the objective value of the candidate solution
 		//			remembering to keep track/update the best solution
 		copySolution(parent1Index,candidateIndex);
 
 		if( (aoHeuristics[hIndex].isCrossover()) ) { //if it is crossover
-//			HeuristicInterface heuristic = (XOHeuristicInterface) aoHeuristics[hIndex];
-//			double newObjVal = heuristic.apply(getSolution(parent1Index), getSolution(parent2Index),getSolution(candidateIndex),
-//												depthOfSearch, intensityOfMutation);
-//			if (newObjVal < getBestSolutionValue()) {
-//				updateBestSolution(candidateIndex);
-//			}
+			XOHeuristicInterface heuristic = (XOHeuristicInterface) aoHeuristics[hIndex];
+			double newObjVal = heuristic.apply(getSolution(parent1Index), getSolution(parent2Index),getSolution(candidateIndex),
+												depthOfSearch, intensityOfMutation);
+			if (newObjVal < getBestSolutionValue()) {
+				updateBestSolution(candidateIndex);
+			}
 		}
 		return getSolution(candidateIndex).getObjectiveFunctionValue();
 	}
@@ -196,7 +196,7 @@ public class AIM_PWP extends ProblemDomain implements Visualisable {
 	@Override
 	public int getNumberOfHeuristics() {
 
-		// TODO - has to be hard-coded due to the design of the HyFlex framework...
+		//has to be hard-coded due to the design of the HyFlex framework...
 		return 7; //what to do?
 	}
 

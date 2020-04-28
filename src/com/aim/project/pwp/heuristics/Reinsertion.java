@@ -44,7 +44,6 @@ public class Reinsertion extends HeuristicOperators implements HeuristicInterfac
 				city_ids[h] = aloCity_ids.get(h);
 			}
 			newCost = deltaEvaluation(oSolution,prevCity_ids,i,j);
-			System.out.printf("index %d&%d, times %d, diff %f\n",i,j,k,newCost-getoObjectiveFunction().getObjectiveFunctionValue(oSolution.getSolutionRepresentation()));
 			oSolution.setObjectiveFunctionValue(newCost);
 
 		}
