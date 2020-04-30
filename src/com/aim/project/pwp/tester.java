@@ -15,15 +15,18 @@ public class tester {
 //        int[] p2pair;
 //        int valueIndex = 0, flagIndex = 1;
 //        int startID, nextID, cycleIndex;
-        String s = "-1.171894715 52.964538";
-        String[] aoSt;
-        aoSt = s.split("\\t");
-        if(aoSt.length!=2){
-            aoSt = s.split(" ");
-        }
+//        String s = "-1.171894715 52.964538";
+//        String[] aoSt;
+//        aoSt = s.split("\\t");
+//        if(aoSt.length!=2){
+//            aoSt = s.split(" ");
+//        }
 //        Double d = Double.parseDouble(aoSt[2]);
-        System.out.print(aoSt[0]);
-
+//        System.out.print(aoSt[0]);
+        int[] i = {1,2,3};
+        int[] j = i.clone();
+        j[0] = 2;
+        System.out.print(i[0]);
 
 
 

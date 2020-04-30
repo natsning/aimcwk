@@ -31,12 +31,15 @@ public class OX implements XOHeuristicInterface {
 	public double apply(PWPSolutionInterface p1, PWPSolutionInterface p2,
 			PWPSolutionInterface c, double depthOfSearch, double intensityOfMutation) {
 
+		int length = p1.getNumberOfLocations()-2;
 		int times = (int)Math.floor(intensityOfMutation / 0.2) + 1;
-		int[] cityID_p1 = p1.clone().getSolutionRepresentation().getSolutionRepresentation();
-		int[] cityID_p2 = p2.clone().getSolutionRepresentation().getSolutionRepresentation();
-		int length = cityID_p1.length;
-		int[] backup_cityID_p1 = new int[length], backup_cityID_p2 = new int[length];
+
+		int[] cityID_p1 = new int[length],cityID_p2 = new int[length];
 		int i,j,indexP1,indexP2;
+		System.arraycopy(p2.getSolutionRepresentation().getSolutionRepresentation(),0,cityID_p2,0,length);
+		System.arraycopy(p1.getSolutionRepresentation().getSolutionRepresentation(),0,cityID_p1,0,length);
+
+		int[] backup_cityID_p1 = new int[length], backup_cityID_p2 = new int[length];
 		Set<Integer> setP1 = new HashSet<>(), setP2 = new HashSet<>();
 
 		for(int loop =0; loop<times; loop++){

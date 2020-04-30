@@ -8,6 +8,7 @@ import java.util.Random;
 import java.util.stream.IntStream;
 
 import com.aim.project.pwp.PWPObjectiveFunction;
+import com.aim.project.pwp.Utilities;
 import com.aim.project.pwp.interfaces.ObjectiveFunctionInterface;
 import com.aim.project.pwp.interfaces.PWPInstanceInterface;
 import com.aim.project.pwp.interfaces.PWPSolutionInterface;
@@ -56,13 +57,7 @@ public class PWPInstance implements PWPInstanceInterface {
 			for (int i = 0; i < getNumberOfLocations() - 2; i++) {
 				city_ids[i] = i;
 			}
-			//random swap
-			for (int i = 0; i < city_ids.length; i++) {
-				int randomIndexToSwap = oRandom.nextInt(city_ids.length);
-				int temp = city_ids[randomIndexToSwap];
-				city_ids[randomIndexToSwap] = city_ids[i];
-				city_ids[i] = temp;
-			}
+			Utilities.shuffle(city_ids,oRandom);
 
 			SolutionRepresentation solRep = new SolutionRepresentation(city_ids);
 			return new PWPSolution(solRep, getPWPObjectiveFunction().getObjectiveFunctionValue(solRep));

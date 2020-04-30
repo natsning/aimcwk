@@ -3,8 +3,6 @@ package com.aim.project.pwp.heuristics;
 import java.util.*;
 
 import com.aim.project.pwp.interfaces.HeuristicInterface;
-import com.aim.project.pwp.interfaces.ObjectiveFunctionInterface;
-import com.aim.project.pwp.interfaces.PWPInstanceInterface;
 import com.aim.project.pwp.interfaces.PWPSolutionInterface;
 
 

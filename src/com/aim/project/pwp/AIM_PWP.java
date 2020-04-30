@@ -77,6 +77,7 @@ public class AIM_PWP extends ProblemDomain implements Visualisable {
 				updateBestSolution(candidateIndex);
 			}
 		}
+
 		return getSolution(candidateIndex).getObjectiveFunctionValue();
 	}
 
@@ -159,7 +160,7 @@ public class AIM_PWP extends ProblemDomain implements Visualisable {
 				arrayList.add(i);
 			}
 		}
-		return convertArrayListToArray(arrayList);
+		return Utilities.convertArrayListToArray(arrayList);
 	}
 
 	@Override
@@ -172,7 +173,7 @@ public class AIM_PWP extends ProblemDomain implements Visualisable {
 				arrayList.add(i);
 			}
 		}
-		return convertArrayListToArray(arrayList);
+		return Utilities.convertArrayListToArray(arrayList);
 	}
 
 	public int[] getHeuristicsThatAreCrossovers(){
@@ -182,22 +183,14 @@ public class AIM_PWP extends ProblemDomain implements Visualisable {
 				arrayList.add(i);
 			}
 		}
-		return convertArrayListToArray(arrayList);
-	}
-
-	private int[] convertArrayListToArray(ArrayList<Integer> al){
-		int[] array = new int[al.size()];
-		for(int i=0;i<al.size();i++){
-			array[i] = al.get(i);
-		}
-		return array;
+		return Utilities.convertArrayListToArray(arrayList);
 	}
 
 	@Override
 	public int getNumberOfHeuristics() {
 
 		//has to be hard-coded due to the design of the HyFlex framework...
-		return 7; //what to do?
+		return 7;
 	}
 
 	@Override
@@ -311,4 +304,5 @@ public class AIM_PWP extends ProblemDomain implements Visualisable {
 		Location[] route = Arrays.stream(city_ids).boxed().map(getLoadedInstance()::getLocationForDelivery).toArray(Location[]::new);
 		return route;
 	}
+
 }

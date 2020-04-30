@@ -32,9 +32,12 @@ public class CX implements XOHeuristicInterface {
 
 		int times = (int)Math.floor(intensityOfMutation / 0.2) + 1;
 		int length = p1.getNumberOfLocations()-2;
-		int[] cityID_p1 = p1.clone().getSolutionRepresentation().getSolutionRepresentation();
-		int[] cityID_p2 = p2.clone().getSolutionRepresentation().getSolutionRepresentation();
+
+		int[] cityID_p1 = new int[length],cityID_p2 = new int[length];
 		int[] backup_cityID_p1 = new int[length], backup_cityID_p2 = new int[length];
+		System.arraycopy(p1.getSolutionRepresentation().getSolutionRepresentation(),0,cityID_p1,0,length);
+		System.arraycopy(p2.getSolutionRepresentation().getSolutionRepresentation(),0,cityID_p2,0,length);
+
 		int valueIndex = 0, flagIndex = 1;
 		int startID,key;
 		HashMap<Integer,int[]> hash;

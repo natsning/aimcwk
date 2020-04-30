@@ -1,7 +1,5 @@
 package com.aim.project.pwp.heuristics;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Random;
 
 import com.aim.project.pwp.interfaces.HeuristicInterface;
