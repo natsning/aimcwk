@@ -9,6 +9,8 @@ import com.aim.project.pwp.interfaces.PWPSolutionInterface;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class SN_HH extends HyperHeuristic {
 
@@ -21,13 +23,18 @@ public class SN_HH extends HyperHeuristic {
     @Override
     protected void solve(ProblemDomain oProblem) {
 
-        int tabuLength = 2, tourSize = 3;
+        int tabuLength = 3, tourSize = 3;
+        int h,prevH=0,rmvH,p1,p2,initialWaterLevel = 20;
+        int waterLevel=initialWaterLevel;
+        int N = oProblem.getNumberOfHeuristics();
 
-        int h,p1,p2;
-        double iom = 0.2, dos = 0.2;
-        boolean iomFlag = false, dosFlag = false;
+        HashSet<Integer> tabuSet = new HashSet<>();
+        HeuristicScore hScore = new HeuristicScore(N);
+
         long iteration = 0;
+        double iom = 0.2, dos = 0.2;
         double current,candidate,currentP1,currentP2;
+        double initialTemp = 0.1, temp = initialTemp;
 
 
         oProblem.setMemorySize(NUM_POPULATION*2);
@@ -40,9 +47,19 @@ public class SN_HH extends HyperHeuristic {
         oProblem.setDepthOfSearch(dos);
 
         //
-        while ( !hasTimeExpired() && oProblem.getBestSolutionValue()!= 35) {
+        while ( !hasTimeExpired()) {
 
-            h = chooseHeuristic(oProblem,iteration,tabuLength);
+            if(iteration==0){
+                prevH = -1;
+                rmvH = -1;
+            }else if(iteration<=tabuLength){
+                prevH = oProblem.getHeuristicCallRecord()[(int)(iteration-1)%N];
+                rmvH = -1;
+            }else{
+                prevH = oProblem.getHeuristicCallRecord()[(int)(iteration-1)%N];
+                rmvH = oProblem.getHeuristicCallRecord()[(int)(iteration-tabuLength)%N];
+            }
+            h = chooseHeuristic(oProblem,prevH,rmvH,tabuSet,hScore);
 
             if (h < 5) {
 
@@ -51,13 +68,19 @@ public class SN_HH extends HyperHeuristic {
                     candidate = oProblem.applyHeuristic(h, i, NUM_POPULATION+i);
                     current = oProblem.getFunctionValue(i);
 
-                    if (candidate <= current) {
+                    if (candidate <= current || rng.nextDouble() <= boltzmannProb(candidate-current,temp)) {
                         oProblem.copySolution(NUM_POPULATION + i, i);
+                        if(candidate<current){
+                            hScore.increaseScore(prevH,h);
+                        }
+                    }else{
+                        waterLevel--;
+                        hScore.decreaseScore(prevH,h);
                     }
                 }//end generation
 
             } else {
-            //check local search's accepting mechanism
+            //TODO check local search's accepting mechanism
 
                 for(int i = 0; i<NUM_POPULATION; i++){
 
@@ -66,25 +89,40 @@ public class SN_HH extends HyperHeuristic {
                     while(p2==p1) {
                         p2 = tournamentSelection(tourSize, oProblem);
                     }
-//                    p1 =0; p2 = 1;
 
                     candidate = oProblem.applyHeuristic(h, p1, p2, NUM_POPULATION+i);
 
                     currentP1 = oProblem.getFunctionValue(p1);
                     currentP2 = oProblem.getFunctionValue(p2);
+                    current = currentP1<currentP2? currentP1: currentP2;
                     //if child outperforms both parents
-                    if(candidate <= currentP1 && candidate <= currentP2){
+                    if(candidate <= current || rng.nextDouble() <= boltzmannProb(candidate-current,temp)){
                         if(currentP1 < currentP2){ //p1 is better than p2
                             oProblem.copySolution(NUM_POPULATION+i,p2);
                         }else{
                             oProblem.copySolution(NUM_POPULATION+i,p1);
                         }
+                        if(candidate<current){
+                            hScore.increaseScore(prevH,h);
+                        }
+                    }else{
+                        waterLevel--;
+                        hScore.decreaseScore(prevH,h);
                     }//end replacing
+
                 }//end for generation
             }//end else
 
-//            replacePopulation(oProblem);
             iteration++;
+
+            if(waterLevel <0){
+                temp = initialTemp;
+                initialWaterLevel += 10;
+                waterLevel = initialWaterLevel;
+            }else{
+                temp *= 0.95;
+            }
+
 
         }//end while
 
@@ -100,28 +138,29 @@ public class SN_HH extends HyperHeuristic {
         return "SN_HH";
     }
 
-    private int chooseHeuristic(ProblemDomain oProblem, long iteration,int tabuLength){
+    private int chooseHeuristic(ProblemDomain oProblem,int prevH,int heuristicToRemoveFromTabu,HashSet<Integer> tabu, HeuristicScore hs){
+        //TODO see if i can refactor this better
+
         int N=oProblem.getNumberOfHeuristics();
-        int h = rng.nextInt(N);
-        while(isTabu(oProblem.getHeuristicCallRecord(),iteration,h,tabuLength)){
-            h = rng.nextInt(N);
-        }
-        oProblem.getHeuristicCallRecord()[(int)iteration%N] = h;
-        return h;
-    }
+        int choice = 0;
+        double bestScore=Integer.MIN_VALUE;
 
-    private boolean isTabu(int[]record, long iteration, int choice, int tabuLength) {
-        if(iteration<tabuLength){
-            tabuLength = (int)iteration;
-        }
-
-        for (int i = 1; i <= tabuLength; i++) {
-            if (record[((int) iteration - i) % record.length] == choice) {
-                return true;
+        for(int heuristic=0; heuristic<N; heuristic++) {
+            if(!(tabu.contains(heuristic)) && hs.getOverallHScore(prevH,heuristic) > bestScore) {
+                bestScore = hs.getOverallHScore(prevH,heuristic);
+                choice = heuristic;
             }
         }
-        return false;
+
+        tabu.add(choice);
+        if(heuristicToRemoveFromTabu!=-1){
+            tabu.remove(heuristicToRemoveFromTabu);
+        }
+
+        return choice;
+
     }
+
 
     private int tournamentSelection(int tourSize, ProblemDomain oProb){
         //shuffles the index of each solution
@@ -141,9 +180,10 @@ public class SN_HH extends HyperHeuristic {
         return perm[fitness_array.indexOf(Collections.min(fitness_array))];
     }
 
-    private void replacePopulation(ProblemDomain oProblem){
-        for(int i=0; i<NUM_POPULATION; i++){
-            oProblem.copySolution(NUM_POPULATION+i,i);
-        }
+    private double boltzmannProb(double delta, double temp){
+        double n = Math.exp( -1* delta / temp);
+//        System.out.println(n);
+        return n;
     }
+
 }
