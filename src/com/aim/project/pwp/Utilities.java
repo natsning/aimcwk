@@ -22,15 +22,15 @@ public class Utilities {
         return array;
     }
 
-    public static void initialiseIntArray(int[] arr, int element){
+    public static void initialiseDoubleArray(double[] arr, int element){
         for (int i = 0; i< arr.length; i++){
             arr[i] = element;
         }
     }
 
-    public static void initialiseIntArray(int[][] arr, int element){
+    public static void initialiseDoubleArray(double[][] arr, int element){
         for( int i=0; i< arr.length; i++){
-            initialiseIntArray(arr[i],element);
+            initialiseDoubleArray(arr[i],element);
         }
     }
 }

@@ -23,10 +23,15 @@ public class tester {
 //        }
 //        Double d = Double.parseDouble(aoSt[2]);
 //        System.out.print(aoSt[0]);
-        int[] i = {1,2,3};
-        int[] j = i.clone();
-        j[0] = 2;
-        System.out.print(i[0]);
+//        int[] i = {1,2,3};
+//        int[] j = i.clone();
+//        j[0] = 2;
+//        System.out.print(i[0]);
+
+        double delta = 0.1;
+//        double temp = 5000*Math.pow(0.98,5000);
+        double temp = 0;
+        System.out.printf("temp=%f, %f",temp,Math.exp( -1* delta / temp));
 
 
 
