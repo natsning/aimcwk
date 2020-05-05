@@ -15,6 +15,8 @@ public class HeuristicScore {
 //    private double pairWeight = 1.0;
     private BigDecimal timeWeight = BigDecimal.ONE;
     private double phi = 0.99;
+    private BigDecimal upperBound = BigDecimal.TEN;
+    private BigDecimal lowerBound = BigDecimal.valueOf(-10);
 
     public HeuristicScore(int numHeuristic){
         this.numHeuristic = numHeuristic;
@@ -22,8 +24,8 @@ public class HeuristicScore {
 //        pairScore = new double[numHeuristic][numHeuristic];
         timeScore = new BigDecimal[numHeuristic];
 
-        Utilities.initialiseBigDecimalArray(indvScore,BigDecimal.TEN);
-        Utilities.initialiseBigDecimalArray(timeScore,BigDecimal.TEN);
+        Utilities.initialiseBigDecimalArray(indvScore,BigDecimal.ZERO);
+        Utilities.initialiseBigDecimalArray(timeScore,BigDecimal.valueOf(5));
     }
 
     public BigDecimal getIndvScore(int hIndex){
@@ -41,7 +43,7 @@ public class HeuristicScore {
     private void updateTimeScore(int chosenHIndex){
         for(int i = 0; i<numHeuristic; i++){
             if(i == chosenHIndex){
-                timeScore[chosenHIndex] = BigDecimal.TEN;
+                timeScore[chosenHIndex] = BigDecimal.ONE;
             }else{
                 timeScore[i] = timeScore[i].add( timeWeight);
 
@@ -52,17 +54,20 @@ public class HeuristicScore {
     public void increaseScore(int hIndex, BigDecimal change){
 
 //        indvScore[hIndex] = indvScore[hIndex].add(indvWeight);
-//        indvScore[hIndex] = indvScore[hIndex].add(change);
-        indvScore[hIndex] = BigDecimal.ONE;
+        indvScore[hIndex] = indvScore[hIndex].add(change);
+        if(indvScore[hIndex].compareTo(upperBound) == 1){
+            indvScore[hIndex] = upperBound;
+        }
         phi = 0.99;
         updateTimeScore(hIndex);
     }
 
     public void decreaseScore(int hIndex, BigDecimal change){
 //        indvScore[hIndex] = indvScore[hIndex].subtract(indvWeight);
-//        indvScore[hIndex] = indvScore[hIndex].subtract(change);
-
-        indvScore[hIndex] = BigDecimal.valueOf(-1);
+        indvScore[hIndex] = indvScore[hIndex].subtract(change);
+        if(indvScore[hIndex].compareTo(lowerBound) == -1){
+            indvScore[hIndex] = lowerBound;
+        }
         if(phi!=0.01){
             phi-=0.01;
         }

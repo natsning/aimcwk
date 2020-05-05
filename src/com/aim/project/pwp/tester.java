@@ -1,6 +1,9 @@
 package com.aim.project.pwp;
 
 
+import com.aim.project.pwp.hyperheuristics.LateAcceptance;
+
+import java.math.BigDecimal;
 import java.util.*;
 
 public class tester {
@@ -28,11 +31,22 @@ public class tester {
 //        j[0] = 2;
 //        System.out.print(i[0]);
 
-        double delta = 0.1;
+//        double delta = 0.1;
 //        double temp = 5000*Math.pow(0.98,5000);
-        double temp = 0;
-        System.out.printf("temp=%f, %f",temp,Math.exp( -1* delta / temp));
-
+//        double temp = 0;
+//        System.out.printf("temp=%f, %f",temp,Math.exp( -1* delta / temp));
+//
+//        Random r = new Random();
+//        LateAcceptance la = new LateAcceptance(10,10,r);
+//        for(int i=0; i<10; i++){
+//            la.updateLateAcceptance(r.nextDouble()*10.0,i);
+//            la.printArray();
+//            System.out.println(la.getDelayedObjVal());
+//        }
+        BigDecimal a = BigDecimal.ONE;
+        BigDecimal b = BigDecimal.TEN;
+        if(b.compareTo(b) == 0)
+            System.out.println('s');
 
 
     }

@@ -25,19 +25,21 @@ public class SN_HH extends HyperHeuristic {
 
 //        int N = oProblem.getNumberOfHeuristics();
         int N = 5;
-        int tourSize = 2, tabuLength = 3;
-        int h,prevH,rmvH,p1,p2,initialWaterLevel = 10;
-        int waterLevel=initialWaterLevel;
-        boolean acceptOnce = false;
+        int tourSize = 2, tabuLength = 2;
+        int h,prevH,rmvH,p1,p2;
+        int indexLA=0;
+//        int initialWaterLevel = 10, waterLevel=initialWaterLevel;
+//        boolean acceptOnce = false;
 
         HashSet<Integer> tabuSet = new HashSet<>();
         HeuristicScore hScore = new HeuristicScore(N);
+        LateAcceptance lAccept = new LateAcceptance(10,5,rng);
 
         long iteration = 0;
-        double initialIOM = 0.1,  iom = initialIOM;
+        double initialIOM = 0.2,  iom = initialIOM;
         double initialDOS = 0.5, dos = initialDOS;
-        double initialTemp = 0.1, temp = initialTemp;
-        double alpha = 0.01, beta = 0.8;
+//        double initialTemp = 0.1, temp = initialTemp;
+//        double alpha = 0.01, beta = 0.8;
         double current,candidate,currentP1,currentP2;
 
 
@@ -58,7 +60,7 @@ public class SN_HH extends HyperHeuristic {
                 rmvH = oProblem.getHeuristicCallRecord()[(int)(iteration-tabuLength)%N];
             }
             h = chooseHeuristic(N,rmvH,tabuSet,hScore);
-            oProblem.getHeuristicCallRecord()[(int)(iteration)%N] = h;
+            oProblem.getHeuristicCallRecord()[(int)iteration%N] = h;
 
             if (h < 5) {
 
@@ -67,11 +69,14 @@ public class SN_HH extends HyperHeuristic {
                     candidate = oProblem.applyHeuristic(h, i, NUM_POPULATION+i);
                     current = oProblem.getFunctionValue(i);
 
-                    oProblem.copySolution(NUM_POPULATION + i, i);
-                    if(candidate<current){
-                        hScore.increaseScore(h,BigDecimal.valueOf(candidate-current));
-                        acceptOnce = true;
+                    if(candidate<= lAccept.getAverage()){
 
+                        oProblem.copySolution(NUM_POPULATION + i, i);
+                        if(candidate<current){
+                            hScore.increaseScore(h,BigDecimal.valueOf(current-candidate));
+                            lAccept.updateLateAcceptance(candidate,indexLA++);
+        //                        acceptOnce = true;
+                        }
                     }else{
                         hScore.decreaseScore(h,BigDecimal.valueOf(candidate-current));
                     }
@@ -81,13 +86,12 @@ public class SN_HH extends HyperHeuristic {
 
                 for(int i = 0; i<NUM_POPULATION; i++){
 
-//                    p1 = tournamentSelection(tourSize,oProblem);
-//                    p2 = p1;
-//                    while(p2==p1) {
-//                        p2 = tournamentSelection(tourSize, oProblem);
-//                    }
+                    p1 = tournamentSelection(tourSize,oProblem);
+                    p2 = p1;
+                    while(p2==p1) {
+                        p2 = tournamentSelection(tourSize, oProblem);
+                    }
 
-                    p1=0;p2=1;
                     candidate = oProblem.applyHeuristic(h, p1, p2, NUM_POPULATION+i);
 
                     currentP1 = oProblem.getFunctionValue(p1);
@@ -101,8 +105,9 @@ public class SN_HH extends HyperHeuristic {
                         oProblem.copySolution(NUM_POPULATION+i,p1);
                     }
                     if(candidate<current){
-                        hScore.increaseScore(h,BigDecimal.valueOf(candidate-current));
-                        acceptOnce = true;
+                        hScore.increaseScore(h,BigDecimal.valueOf(current-candidate));
+                        lAccept.updateLateAcceptance(candidate,indexLA++);
+//                        acceptOnce = true;
                     }
                     else{
                         hScore.decreaseScore(h,BigDecimal.valueOf(candidate-current));
@@ -112,14 +117,14 @@ public class SN_HH extends HyperHeuristic {
             }//end else
 
             iteration++;
-
-            if (acceptOnce){
-                acceptOnce = false;
-                waterLevel = initialWaterLevel;
-            }else{
-                waterLevel--;
-            }
-
+//
+//            if (acceptOnce){
+//                acceptOnce = false;
+//                waterLevel = initialWaterLevel;
+//            }else{
+//                waterLevel--;
+//            }
+//
 //            if(waterLevel == 0){
 //                initialWaterLevel += 10;
 //                waterLevel = initialWaterLevel;
@@ -191,7 +196,10 @@ public class SN_HH extends HyperHeuristic {
 //        while(tabu.contains(choice)){
 //            choice = rng.nextInt(N);
 //        }
+        for(int i: tabu){
+            System.out.printf("-%d-",i);
 
+        }
         tabu.add(choice);
         if(heuristicToRemoveFromTabu!=-1){
             tabu.remove(heuristicToRemoveFromTabu);
