@@ -1,5 +1,6 @@
 package com.aim.project.pwp;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -22,15 +23,15 @@ public class Utilities {
         return array;
     }
 
-    public static void initialiseDoubleArray(double[] arr, int element){
+    public static void initialiseBigDecimalArray(BigDecimal[] arr, BigDecimal element){
         for (int i = 0; i< arr.length; i++){
             arr[i] = element;
         }
     }
 
-    public static void initialiseDoubleArray(double[][] arr, int element){
-        for( int i=0; i< arr.length; i++){
-            initialiseDoubleArray(arr[i],element);
-        }
-    }
+//    public static void initialiseDoubleArray(double[][] arr, int element){
+//        for( int i=0; i< arr.length; i++){
+//            initialiseDoubleArray(arr[i],element);
+//        }
+//    }
 }

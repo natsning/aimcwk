@@ -7,13 +7,14 @@ import com.aim.project.pwp.SolutionPrinter;
 import com.aim.project.pwp.Utilities;
 import com.aim.project.pwp.interfaces.PWPSolutionInterface;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 
 public class SN_HH extends HyperHeuristic {
 
-    private int NUM_POPULATION = 5;
+    private int NUM_POPULATION = 1;
 
     public SN_HH(long lSeed) {
 
@@ -22,7 +23,8 @@ public class SN_HH extends HyperHeuristic {
     @Override
     protected void solve(ProblemDomain oProblem) {
 
-        int N = oProblem.getNumberOfHeuristics();
+//        int N = oProblem.getNumberOfHeuristics();
+        int N = 5;
         int tourSize = 2, tabuLength = 3;
         int h,prevH,rmvH,p1,p2,initialWaterLevel = 10;
         int waterLevel=initialWaterLevel;
@@ -50,17 +52,12 @@ public class SN_HH extends HyperHeuristic {
 
         while ( !hasTimeExpired()) {
 
-            if(iteration==0){
-                prevH = -1;
-                rmvH = -1;
-            }else if(iteration<tabuLength){
-                prevH = oProblem.getHeuristicCallRecord()[(int)(iteration-1)%N];
+            if(iteration<tabuLength){
                 rmvH = -1;
             }else{
-                prevH = oProblem.getHeuristicCallRecord()[(int)(iteration-1)%N];
                 rmvH = oProblem.getHeuristicCallRecord()[(int)(iteration-tabuLength)%N];
             }
-            h = chooseHeuristic(oProblem,prevH,rmvH,tabuSet,hScore);
+            h = chooseHeuristic(N,rmvH,tabuSet,hScore);
             oProblem.getHeuristicCallRecord()[(int)(iteration)%N] = h;
 
             if (h < 5) {
@@ -70,48 +67,45 @@ public class SN_HH extends HyperHeuristic {
                     candidate = oProblem.applyHeuristic(h, i, NUM_POPULATION+i);
                     current = oProblem.getFunctionValue(i);
 
-                    if (candidate <= current || rng.nextDouble() <= boltzmannProb(candidate-current,temp)) {
+                    oProblem.copySolution(NUM_POPULATION + i, i);
+                    if(candidate<current){
+                        hScore.increaseScore(h,BigDecimal.valueOf(candidate-current));
+                        acceptOnce = true;
 
-                        oProblem.copySolution(NUM_POPULATION + i, i);
-                        if(candidate<current){
-                            hScore.increaseScore(prevH,h);
-                            acceptOnce = true;
-                        }
                     }else{
-                        hScore.decreaseScore(prevH,h);
+                        hScore.decreaseScore(h,BigDecimal.valueOf(candidate-current));
                     }
                 }//end generation
 
             } else {
-            //TODO check local search's accepting mechanism
 
                 for(int i = 0; i<NUM_POPULATION; i++){
 
-                    p1 = tournamentSelection(tourSize,oProblem);
-                    p2 = p1;
-                    while(p2==p1) {
-                        p2 = tournamentSelection(tourSize, oProblem);
-                    }
+//                    p1 = tournamentSelection(tourSize,oProblem);
+//                    p2 = p1;
+//                    while(p2==p1) {
+//                        p2 = tournamentSelection(tourSize, oProblem);
+//                    }
 
+                    p1=0;p2=1;
                     candidate = oProblem.applyHeuristic(h, p1, p2, NUM_POPULATION+i);
 
                     currentP1 = oProblem.getFunctionValue(p1);
                     currentP2 = oProblem.getFunctionValue(p2);
                     current = currentP1<currentP2? currentP1: currentP2;
 
-                    if(candidate <= current || rng.nextDouble() <= boltzmannProb(candidate-current,temp)){
-
-                        if(currentP1 < currentP2){ //p1 is better than p2
-                            oProblem.copySolution(NUM_POPULATION+i,p2);
-                        }else{
-                            oProblem.copySolution(NUM_POPULATION+i,p1);
-                        }
-                        if(candidate<current){
-                            hScore.increaseScore(prevH,h);
-                            acceptOnce = true;
-                        }
+                    //AM
+                    if(currentP1 < currentP2){ //p1 is better than p2
+                        oProblem.copySolution(NUM_POPULATION+i,p2);
                     }else{
-                        hScore.decreaseScore(prevH,h);
+                        oProblem.copySolution(NUM_POPULATION+i,p1);
+                    }
+                    if(candidate<current){
+                        hScore.increaseScore(h,BigDecimal.valueOf(candidate-current));
+                        acceptOnce = true;
+                    }
+                    else{
+                        hScore.decreaseScore(h,BigDecimal.valueOf(candidate-current));
                     }//end replacing
 
                 }//end for generation
@@ -126,29 +120,26 @@ public class SN_HH extends HyperHeuristic {
                 waterLevel--;
             }
 
-            if(waterLevel == 0){
-                System.out.printf("reset\n ");
-
-                temp = initialTemp;
-                initialWaterLevel += 10;
-                waterLevel = initialWaterLevel;
+//            if(waterLevel == 0){
+//                initialWaterLevel += 10;
+//                waterLevel = initialWaterLevel;
 //                hScore.resetScore();
 //                for (int i: oProblem.getHeuristicsThatUseIntensityOfMutation()){
 //                    hScore.boostScore(i);
 //                }
 
-            }else{
-                temp = coolTemperature(temp,alpha);
+//            }else{
+//                temp = coolTemperature(temp,alpha);
 //                iom*= beta;
 //                dos*= beta;
 //                oProblem.setIntensityOfMutation(iom);
 //                oProblem.setDepthOfSearch(dos);
-            }
-
-//            for(int rec: oProblem.getHeuristicCallRecord()){
-//                System.out.print(rec);
 //            }
-//            System.out.printf(" %d\n",rmvH);
+
+            for(int rec: oProblem.getHeuristicCallRecord()){
+                System.out.print(rec);
+            }
+            System.out.printf("\n");
 
         }//end while
 
@@ -159,10 +150,7 @@ public class SN_HH extends HyperHeuristic {
         System.out.println(String.format("Total iterations = %d", iteration));
 
         for(int i = 0;i<N; i++){
-            for(int j=0; j<N; j++){
-                System.out.printf("%f ",hScore.getOverallHScore(i,j));
-            }
-            System.out.println(' ');
+            System.out.printf("%f ",hScore.getOverallHScore(i));
         }
     }
 
@@ -172,38 +160,37 @@ public class SN_HH extends HyperHeuristic {
         return "SN_HH";
     }
 
-    private int chooseHeuristic(ProblemDomain oProblem,int prevH,int heuristicToRemoveFromTabu,HashSet<Integer> tabu, HeuristicScore hs){
-        //TODO see if i can refactor this better
+    private int chooseHeuristic(int num_heuristics,int heuristicToRemoveFromTabu,HashSet<Integer> tabu, HeuristicScore hs){
 
-        int N=oProblem.getNumberOfHeuristics();
         int choice = 0;
-//        double bestScore=Integer.MIN_VALUE;
-//        double currentHScore;
-//        ArrayList<Integer> aloheuristic = new ArrayList<>();
-//
-//        for(int heuristic=0; heuristic<N; heuristic++) {
-//
-//            if(!(tabu.contains(heuristic))) {
-//                currentHScore = hs.getOverallHScore(prevH,heuristic);
-//
-//                if( currentHScore > bestScore){
-//                    bestScore = hs.getOverallHScore(prevH,heuristic);
-//                    aloheuristic.clear();
-//                    aloheuristic.add(heuristic);
-//                    choice=heuristic;
-//                }else if(currentHScore == bestScore){
-//                    aloheuristic.add(heuristic);
-//                }
-//            }
-//        }
-//        if(aloheuristic.size()!=1){
-//            choice = aloheuristic.get(rng.nextInt(aloheuristic.size()));
-//        }
+        BigDecimal currentHScore = hs.getOverallHScore(0);;
+        BigDecimal bestScore = currentHScore;
+        ArrayList<Integer> aloheuristic = new ArrayList<>();
+        aloheuristic.add(0);
 
-        choice =rng.nextInt(N);
-        while(tabu.contains(choice)){
-            choice = rng.nextInt(N);
+        for(int heuristic=0; heuristic<num_heuristics; heuristic++) {
+
+            if(!(tabu.contains(heuristic))) {
+                currentHScore = hs.getOverallHScore(heuristic);
+
+                if( currentHScore.compareTo(bestScore) == 1){
+                    bestScore = hs.getOverallHScore(heuristic);
+                    aloheuristic.clear();
+                    aloheuristic.add(heuristic);
+                    choice=heuristic;
+                }else if(currentHScore == bestScore){
+                    aloheuristic.add(heuristic);
+                }
+            }
         }
+        if(aloheuristic.size()!=1){
+            choice = aloheuristic.get(rng.nextInt(aloheuristic.size()));
+        }
+//
+//        choice =rng.nextInt(N);
+//        while(tabu.contains(choice)){
+//            choice = rng.nextInt(N);
+//        }
 
         tabu.add(choice);
         if(heuristicToRemoveFromTabu!=-1){
