@@ -7,6 +7,7 @@ public class LateAcceptance {
     private double[] aoObjectiveValues;
     private int num;
     private int pointIndex;
+    private int updateIndex = 0;
 
     public LateAcceptance(int degreeOfLateness,double defaultValue, Random rng){
         num = degreeOfLateness;
@@ -19,8 +20,8 @@ public class LateAcceptance {
 
     }
 
-    public void updateLateAcceptance(double objVal, int index ){
-        aoObjectiveValues[index%num] = objVal;
+    public void updateLateAcceptance(double objVal ){
+        aoObjectiveValues[updateIndex++%num] = objVal;
     }
 
     public double getAverage( ){

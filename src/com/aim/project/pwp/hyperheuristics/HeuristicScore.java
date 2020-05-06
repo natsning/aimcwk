@@ -14,9 +14,9 @@ public class HeuristicScore {
     private BigDecimal indvWeight = BigDecimal.ONE;
 //    private double pairWeight = 1.0;
     private BigDecimal timeWeight = BigDecimal.ONE;
-    private double phi = 0.99;
-    private BigDecimal upperBound = BigDecimal.TEN;
-    private BigDecimal lowerBound = BigDecimal.valueOf(-10);
+    private BigDecimal phi = BigDecimal.valueOf(0.99);
+    private BigDecimal upperBound = BigDecimal.valueOf(5);
+    private BigDecimal lowerBound = BigDecimal.valueOf(-5);
 
     public HeuristicScore(int numHeuristic){
         this.numHeuristic = numHeuristic;
@@ -40,7 +40,7 @@ public class HeuristicScore {
         return timeScore[hIndex];
     }
 
-    private void updateTimeScore(int chosenHIndex){
+    public void updateTimeScore(int chosenHIndex){
         for(int i = 0; i<numHeuristic; i++){
             if(i == chosenHIndex){
                 timeScore[chosenHIndex] = BigDecimal.ONE;
@@ -58,7 +58,7 @@ public class HeuristicScore {
         if(indvScore[hIndex].compareTo(upperBound) == 1){
             indvScore[hIndex] = upperBound;
         }
-        phi = 0.99;
+        phi = BigDecimal.valueOf(0.99);
         updateTimeScore(hIndex);
     }
 
@@ -68,8 +68,8 @@ public class HeuristicScore {
         if(indvScore[hIndex].compareTo(lowerBound) == -1){
             indvScore[hIndex] = lowerBound;
         }
-        if(phi!=0.01){
-            phi-=0.01;
+        if(phi.compareTo(BigDecimal.valueOf(0.01)) == 1){
+            phi = phi.subtract(BigDecimal.valueOf(0.01));
         }
         updateTimeScore(hIndex);
     }
@@ -83,7 +83,14 @@ public class HeuristicScore {
     }
 
     public BigDecimal getOverallHScore(int hIndex){
-        return (getIndvScore(hIndex).multiply(BigDecimal.valueOf(phi)).add(BigDecimal.valueOf(1-phi).multiply(getTimeScore(hIndex))));
+        return (getIndvScore(hIndex).multiply(phi).add((BigDecimal.valueOf(1).subtract(phi)).multiply(getTimeScore(hIndex))));
+//        return (getIndvScore(hIndex).add(getTimeScore(hIndex)));
+    }
+
+    public void printHScore(){
+        for(int i=0; i<numHeuristic; i++){
+            System.out.printf("%d: %.5f %.5f %.5f\n",i,indvScore[i],timeScore[i],getOverallHScore(i));
+        }
     }
 
 }

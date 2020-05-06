@@ -78,8 +78,7 @@ public class OX implements XOHeuristicInterface {
 		}//end outer for
 
 		SolutionRepresentation solRep = new SolutionRepresentation(oRandom.nextBoolean()? cityID_p1 : cityID_p2);
-		PWPSolutionInterface sol = new PWPSolution(solRep,oObjectiveFunction.getObjectiveFunctionValue(solRep));
-		c = sol;
+		c = new PWPSolution(solRep,oObjectiveFunction.getObjectiveFunctionValue(solRep));
 
 		return c.getObjectiveFunctionValue();
 	}

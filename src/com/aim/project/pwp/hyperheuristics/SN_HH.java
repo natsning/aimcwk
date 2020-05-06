@@ -23,11 +23,10 @@ public class SN_HH extends HyperHeuristic {
     @Override
     protected void solve(ProblemDomain oProblem) {
 
-//        int N = oProblem.getNumberOfHeuristics();
-        int N = 5;
-        int tourSize = 2, tabuLength = 2;
+        int N = oProblem.getNumberOfHeuristics();
+//        int N = 5;
+        int tourSize = 2, tabuLength = 3;
         int h,prevH,rmvH,p1,p2;
-        int indexLA=0;
 //        int initialWaterLevel = 10, waterLevel=initialWaterLevel;
 //        boolean acceptOnce = false;
 
@@ -43,16 +42,20 @@ public class SN_HH extends HyperHeuristic {
         double current,candidate,currentP1,currentP2;
 
 
-        oProblem.setMemorySize(NUM_POPULATION*2);
+        oProblem.setMemorySize(NUM_POPULATION*2+1);
 
         for(int i = 0; i<NUM_POPULATION; i++){
             oProblem.initialiseSolution(i);
         }
+        if(NUM_POPULATION==1){
+            oProblem.initialiseSolution(1);
+        }
+
 
         oProblem.setIntensityOfMutation(iom);
         oProblem.setDepthOfSearch(dos);
 
-        while ( !hasTimeExpired()) {
+        while (!hasTimeExpired()) {
 
             if(iteration<tabuLength){
                 rmvH = -1;
@@ -66,18 +69,24 @@ public class SN_HH extends HyperHeuristic {
 
                 for(int i = 0; i<NUM_POPULATION; i++){
 
-                    candidate = oProblem.applyHeuristic(h, i, NUM_POPULATION+i);
+                    candidate = oProblem.applyHeuristic(h, i,2 );
                     current = oProblem.getFunctionValue(i);
 
                     if(candidate<= lAccept.getAverage()){
 
-                        oProblem.copySolution(NUM_POPULATION + i, i);
+                        lAccept.updateLateAcceptance(candidate);
+                        oProblem.copySolution(2, i);
+
                         if(candidate<current){
+//                            System.out.printf("%d improved to %f (%f)\n",h,candidate,current);
                             hScore.increaseScore(h,BigDecimal.valueOf(current-candidate));
-                            lAccept.updateLateAcceptance(candidate,indexLA++);
         //                        acceptOnce = true;
+                        }else{
+//                            System.out.printf("%d better than avg %f\n",h,candidate);
+                            hScore.updateTimeScore(h);
                         }
                     }else{
+//                        System.out.printf("%d worsen to %f\n",h,candidate);
                         hScore.decreaseScore(h,BigDecimal.valueOf(candidate-current));
                     }
                 }//end generation
@@ -86,30 +95,36 @@ public class SN_HH extends HyperHeuristic {
 
                 for(int i = 0; i<NUM_POPULATION; i++){
 
-                    p1 = tournamentSelection(tourSize,oProblem);
-                    p2 = p1;
-                    while(p2==p1) {
-                        p2 = tournamentSelection(tourSize, oProblem);
-                    }
-
-                    candidate = oProblem.applyHeuristic(h, p1, p2, NUM_POPULATION+i);
+//                    p1 = tournamentSelection(tourSize,oProblem);
+//                    p2 = p1;
+//                    while(p2==p1) {
+//                        p2 = tournamentSelection(tourSize, oProblem);
+//                    }
+                    p1=0;p2=1;
+                    candidate = oProblem.applyHeuristic(h, p1, p2, 2);
 
                     currentP1 = oProblem.getFunctionValue(p1);
                     currentP2 = oProblem.getFunctionValue(p2);
                     current = currentP1<currentP2? currentP1: currentP2;
 
-                    //AM
-                    if(currentP1 < currentP2){ //p1 is better than p2
-                        oProblem.copySolution(NUM_POPULATION+i,p2);
-                    }else{
-                        oProblem.copySolution(NUM_POPULATION+i,p1);
-                    }
-                    if(candidate<current){
-                        hScore.increaseScore(h,BigDecimal.valueOf(current-candidate));
-                        lAccept.updateLateAcceptance(candidate,indexLA++);
-//                        acceptOnce = true;
+                    if(candidate<= lAccept.getAverage()) {
+                        lAccept.updateLateAcceptance(candidate);
+                        if (currentP1 < currentP2) { //p1 is better than p2
+                            oProblem.copySolution(2, p2);
+                        } else {
+                            oProblem.copySolution(2, p1);
+                        }
+                        if (candidate < current) {
+//                            System.out.printf("%d decreased to %f\n",h,candidate);
+                            hScore.increaseScore(h, BigDecimal.valueOf(current - candidate));
+                            //                        acceptOnce = true;
+                        }else{
+//                            System.out.printf("%d better than avg %f\n",h,candidate);
+                            hScore.updateTimeScore(h);
+                        }
                     }
                     else{
+//                        System.out.printf("%d worsen to %f\n",h,candidate);
                         hScore.decreaseScore(h,BigDecimal.valueOf(candidate-current));
                     }//end replacing
 
@@ -140,13 +155,14 @@ public class SN_HH extends HyperHeuristic {
 //                oProblem.setIntensityOfMutation(iom);
 //                oProblem.setDepthOfSearch(dos);
 //            }
-
             for(int rec: oProblem.getHeuristicCallRecord()){
                 System.out.print(rec);
             }
             System.out.printf("\n");
 
+//            hScore.printHScore();
         }//end while
+
 
         SolutionPrinter oSP = new SolutionPrinter("out.csv");
         PWPSolutionInterface oSolution = ((AIM_PWP) oProblem).getBestSolution();
@@ -154,9 +170,7 @@ public class SN_HH extends HyperHeuristic {
 
         System.out.println(String.format("Total iterations = %d", iteration));
 
-        for(int i = 0;i<N; i++){
-            System.out.printf("%f ",hScore.getOverallHScore(i));
-        }
+
     }
 
     @Override
@@ -168,7 +182,7 @@ public class SN_HH extends HyperHeuristic {
     private int chooseHeuristic(int num_heuristics,int heuristicToRemoveFromTabu,HashSet<Integer> tabu, HeuristicScore hs){
 
         int choice = 0;
-        BigDecimal currentHScore = hs.getOverallHScore(0);;
+        BigDecimal currentHScore = BigDecimal.ZERO;
         BigDecimal bestScore = currentHScore;
         ArrayList<Integer> aloheuristic = new ArrayList<>();
         aloheuristic.add(0);
@@ -176,6 +190,7 @@ public class SN_HH extends HyperHeuristic {
         for(int heuristic=0; heuristic<num_heuristics; heuristic++) {
 
             if(!(tabu.contains(heuristic))) {
+
                 currentHScore = hs.getOverallHScore(heuristic);
 
                 if( currentHScore.compareTo(bestScore) == 1){
@@ -196,10 +211,10 @@ public class SN_HH extends HyperHeuristic {
 //        while(tabu.contains(choice)){
 //            choice = rng.nextInt(N);
 //        }
-        for(int i: tabu){
-            System.out.printf("-%d-",i);
-
-        }
+//        for(int i: tabu){
+//            System.out.printf("-%d-",i);
+//
+//        }
         tabu.add(choice);
         if(heuristicToRemoveFromTabu!=-1){
             tabu.remove(heuristicToRemoveFromTabu);
