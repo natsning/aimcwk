@@ -9,23 +9,23 @@ public class HeuristicScore {
 
     private int numHeuristic;
     private BigDecimal[] indvScore;
-//    private double[][] pairScore;
     private BigDecimal[] timeScore;
     private BigDecimal indvWeight = BigDecimal.ONE;
-//    private double pairWeight = 1.0;
     private BigDecimal timeWeight = BigDecimal.ONE;
     private BigDecimal phi = BigDecimal.valueOf(0.99);
-    private BigDecimal upperBound = BigDecimal.valueOf(5);
-    private BigDecimal lowerBound = BigDecimal.valueOf(-5);
+    private BigDecimal upperBound;
+    private BigDecimal lowerBound;
 
-    public HeuristicScore(int numHeuristic){
+    public HeuristicScore(int numHeuristic,double initialObjVal){
         this.numHeuristic = numHeuristic;
         indvScore = new BigDecimal[numHeuristic];
-//        pairScore = new double[numHeuristic][numHeuristic];
         timeScore = new BigDecimal[numHeuristic];
 
         Utilities.initialiseBigDecimalArray(indvScore,BigDecimal.ZERO);
         Utilities.initialiseBigDecimalArray(timeScore,BigDecimal.valueOf(5));
+        upperBound = BigDecimal.valueOf(initialObjVal*1.2);
+        lowerBound = BigDecimal.valueOf(initialObjVal*-1.2);
+
     }
 
     public BigDecimal getIndvScore(int hIndex){

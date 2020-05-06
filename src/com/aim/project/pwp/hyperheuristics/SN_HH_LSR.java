@@ -7,13 +7,14 @@ import com.aim.project.pwp.SolutionPrinter;
 import com.aim.project.pwp.Utilities;
 import com.aim.project.pwp.interfaces.PWPSolutionInterface;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 
 public class SN_HH_LSR extends HyperHeuristic {
 
-    private int NUM_POPULATION = 5;
+    private int NUM_POPULATION = 1;
 
     public SN_HH_LSR(long lSeed) {
 
@@ -28,8 +29,9 @@ public class SN_HH_LSR extends HyperHeuristic {
         int waterLevel=initialWaterLevel;
         boolean acceptOnce = false;
 
-        HashSet<Integer> tabuSet = new HashSet<>();
-        HeuristicScore hScore = new HeuristicScore(N);
+        int[] mutationSet = oProblem.getHeuristicsOfType(ProblemDomain.HeuristicType.MUTATION);
+        int[] localSearchSet = oProblem.getHeuristicsOfType(ProblemDomain.HeuristicType.LOCAL_SEARCH);
+        int[] crossoverSet = oProblem.getHeuristicsOfType(ProblemDomain.HeuristicType.CROSSOVER);
 
         long iteration = 0;
         double initialIOM = 0.2,  iom = initialIOM;
@@ -40,74 +42,102 @@ public class SN_HH_LSR extends HyperHeuristic {
         double current,candidate,currentP1,currentP2;
 
 
-        oProblem.setMemorySize(NUM_POPULATION*2);
+        oProblem.setMemorySize(3);
 
-        for(int i = 0; i<NUM_POPULATION; i++){
+        for(int i = 0; i<2; i++){
             oProblem.initialiseSolution(i);
         }
+
+        Double initialObjVal = oProblem.getBestSolutionValue();
+        LateAcceptance lAccept = new LateAcceptance(10,initialObjVal*1.1,rng);
+        HeuristicScore mutationScore = new HeuristicScore(mutationSet.length,initialObjVal*1.2);
+        HeuristicScore ilsScore = new HeuristicScore(localSearchSet.length,initialObjVal*1.2);
+        HeuristicScore crossoverScore = new HeuristicScore(crossoverSet.length,initialObjVal*1.2);
 
         oProblem.setIntensityOfMutation(iom);
         oProblem.setDepthOfSearch(dos);
 
         while ( !hasTimeExpired()) {
 
-            h = chooseHeuristic(oProblem.getHeuristicsOfType(ProblemDomain.HeuristicType.MUTATION));
+            h = chooseHeuristic(mutationSet,mutationScore);
             oProblem.getHeuristicCallRecord()[(int)(iteration)%N] = h;
 
-            for(int i = 0; i<NUM_POPULATION; i++) {
 
-                candidate = oProblem.applyHeuristic(h, i, NUM_POPULATION + i);
-                current = oProblem.getFunctionValue(i);
+            candidate = oProblem.applyHeuristic(h, 0,2);
+            current = oProblem.getFunctionValue(0);
 
-                if (candidate <= current || rng.nextDouble() <= boltzmannProb(candidate - current, temp)) {
+            if (candidate <= lAccept.getAverage()){
 
-                    oProblem.copySolution(NUM_POPULATION + i, i);
-                    acceptOnce = true;
-
+                oProblem.copySolution(2, 0);
+                acceptOnce = true;
+                if(candidate<current){
+                    mutationScore.increaseScore(h,BigDecimal.valueOf(current-candidate));
+                }else{
+                    mutationScore.updateTimeScore(h);
                 }
+
+            }else{
+                mutationScore.decreaseScore(h,BigDecimal.valueOf(candidate-current));
             }
+
 
             iteration++;
 
-            if (acceptOnce && rng.nextDouble()>=crossIOM){
+            if (acceptOnce&&rng.nextBoolean()){
                 acceptOnce = false;
             }else{
 
-                oProblem.setIntensityOfMutation(crossIOM);
-                for(int i = 0; i<NUM_POPULATION; i++){
+                prevH = chooseHeuristic(crossoverSet,crossoverScore);
+                candidate = oProblem.applyHeuristic(crossoverSet[prevH], 0, 1, 2);
+                h = chooseHeuristic(localSearchSet,ilsScore);
+                candidate = oProblem.applyHeuristic(localSearchSet[h],0,2);
+                currentP1 = oProblem.getFunctionValue(0);
+                currentP2 = oProblem.getFunctionValue(1);
+                current = currentP1<currentP2? currentP1: currentP2;
 
-                    p1 = tournamentSelection(tourSize,oProblem);
-                    p2 = p1;
-                    while(p2==p1) {
-                        p2 = tournamentSelection(tourSize, oProblem);
+                if(candidate<= lAccept.getAverage()){
+
+                    lAccept.updateLateAcceptance(candidate);
+                    if (currentP1 < currentP2) { //p1 is better than p2
+                        oProblem.copySolution(2, 0);
+                    } else {
+                        oProblem.copySolution(2, 1);
                     }
 
-                    h = chooseHeuristic(oProblem.getHeuristicsOfType(ProblemDomain.HeuristicType.CROSSOVER));
-                    candidate = oProblem.applyHeuristic(h, p1, p2, NUM_POPULATION+i);
-                    h = chooseHeuristic(oProblem.getHeuristicsOfType(ProblemDomain.HeuristicType.LOCAL_SEARCH));
-                    candidate = oProblem.applyHeuristic(h,i,NUM_POPULATION+i);
-                    currentP1 = oProblem.getFunctionValue(p1);
-                    currentP2 = oProblem.getFunctionValue(p2);
-                    current = currentP1<currentP2? currentP1: currentP2;
+                    if(candidate<current){
+//                            System.out.printf("%d improved to %f (%f)\n",h,candidate,current);
+                        crossoverScore.increaseScore(prevH,BigDecimal.valueOf(current-candidate));
+                        ilsScore.increaseScore(h,BigDecimal.valueOf(current-candidate));
+//                  acceptOnce = true;
+                    }else{
+//                            System.out.printf("%d better than avg %f\n",h,candidate);
+                        crossoverScore.updateTimeScore(prevH);
+                        ilsScore.updateTimeScore(h);
+                    }
+                    acceptOnce = true;
+                }else{
+//                        System.out.printf("%d worsen to %f\n",h,candidate);
+                    crossoverScore.decreaseScore(prevH,BigDecimal.valueOf(candidate-current));
+                    ilsScore.decreaseScore(h,BigDecimal.valueOf(candidate-current));
+                }
 
-                    if(candidate <= current || rng.nextDouble() <= boltzmannProb(candidate-current,temp)){
-
-                        acceptOnce = true;
-                        replaceWorst(oProblem,NUM_POPULATION,NUM_POPULATION+i);
-                    }//end replacing
-                }//end for generation
-                crossIOM*=beta;
-                oProblem.setIntensityOfMutation(iom);
             }
 
-            temp = coolTemperature(temp,alpha);
-            for(int i=0; i<NUM_POPULATION; i++){
-                h = chooseHeuristic(oProblem.getHeuristicsOfType(ProblemDomain.HeuristicType.LOCAL_SEARCH));
-                candidate = oProblem.applyHeuristic(h,i,NUM_POPULATION+i);
-                current = oProblem.getFunctionValue(i);
-                if(candidate>current){
-                    oProblem.copySolution(NUM_POPULATION + i, i);
+            h = chooseHeuristic(localSearchSet,ilsScore);
+            candidate = oProblem.applyHeuristic(localSearchSet[h],0,2);
+            current = oProblem.getFunctionValue(0);
+            if (candidate <= lAccept.getAverage()){
+
+                oProblem.copySolution(2, 0);
+                acceptOnce = true;
+                if(candidate<current){
+                    ilsScore.increaseScore(h,BigDecimal.valueOf(current-candidate));
+                }else{
+                    ilsScore.updateTimeScore(h);
                 }
+
+            }else{
+                ilsScore.decreaseScore(h,BigDecimal.valueOf(candidate-current));
             }
 
         }//end while
@@ -126,56 +156,62 @@ public class SN_HH_LSR extends HyperHeuristic {
         return "SN_HH";
     }
 
-    private int chooseHeuristic(int[] heuristicSet){
+    private int chooseHeuristic(int[] heuristicSet, HeuristicScore hs){
 
-        int N=heuristicSet.length;
-        return heuristicSet[rng.nextInt(N)];
+        int num_heuristics=heuristicSet.length;
+        int choice = 0;
+        BigDecimal currentHScore = BigDecimal.valueOf(Double.MIN_VALUE);
+        BigDecimal bestScore = currentHScore;
+        ArrayList<Integer> aloheuristic = new ArrayList<>();
+        aloheuristic.add(0);
 
-    }
+        for(int heuristic=0; heuristic<num_heuristics; heuristic++) {
 
-    private int tournamentSelection(int tourSize, ProblemDomain oProb){
-        //shuffles the index of each solution
-        int[] perm = new int[NUM_POPULATION];
-        for (int i = 0; i < NUM_POPULATION; i++){
-            perm[i] = i;
-        }
-        Utilities.shuffle(perm,rng);
+            currentHScore = hs.getOverallHScore(heuristic);
 
-        //get fitness of each selected opponents,
-        // index of fitness array is corresponds to the shuffled sequence of perm
-        ArrayList<Double> fitness_array = new ArrayList<>(tourSize);
-        for (int i = 0; i < tourSize; i++){
-            fitness_array.add(oProb.getFunctionValue(perm[i]));
-        }
-        //return the index of solution
-        return perm[fitness_array.indexOf(Collections.min(fitness_array))];
-    }
-
-    private void replaceWorst(ProblemDomain oProb,int N, int c){
-        int worstIndex = 0;
-        double worstValue = Double.MIN_VALUE;
-        double value;
-        for(int i = 0; i<NUM_POPULATION; i++){
-            value = oProb.getFunctionValue(i);
-            if(value>worstValue){
-                worstIndex = i;
+            if( currentHScore.compareTo(bestScore) == 1){
+                bestScore = hs.getOverallHScore(heuristic);
+                aloheuristic.clear();
+                aloheuristic.add(heuristic);
+                choice=heuristic;
+            }else if(currentHScore.compareTo(bestScore) == 0){
+                aloheuristic.add(heuristic);
             }
+
         }
-        oProb.copySolution(c,worstIndex);
-    }
-    private double boltzmannProb(double delta, double temp){
-        if (temp<0.00000001){
-            temp = 0;
+        if(aloheuristic.size()!=1){
+            choice = aloheuristic.get(rng.nextInt(aloheuristic.size()));
         }
-        double n = Math.exp( -1* delta / temp);
-//        System.out.printf("delta%f, temp%.5f, prob%.5f\n",delta,temp,n);
-        return n;
-//        return 0;
+
+        return choice;
     }
 
-    private double coolTemperature(double temp,double alpha){
-        return (temp/(1+temp*alpha));
-//        return (temp*alpha);
-    }
+
+//    private void replaceWorst(ProblemDomain oProb,int N, int c){
+//        int worstIndex = 0;
+//        double worstValue = Double.MIN_VALUE;
+//        double value;
+//        for(int i = 0; i<NUM_POPULATION; i++){
+//            value = oProb.getFunctionValue(i);
+//            if(value>worstValue){
+//                worstIndex = i;
+//            }
+//        }
+//        oProb.copySolution(c,worstIndex);
+//    }
+//    private double boltzmannProb(double delta, double temp){
+//        if (temp<0.00000001){
+//            temp = 0;
+//        }
+//        double n = Math.exp( -1* delta / temp);
+////        System.out.printf("delta%f, temp%.5f, prob%.5f\n",delta,temp,n);
+//        return n;
+////        return 0;
+//    }
+
+//    private double coolTemperature(double temp,double alpha){
+//        return (temp/(1+temp*alpha));
+////        return (temp*alpha);
+//    }
 
 }

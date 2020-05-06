@@ -25,14 +25,12 @@ public class SN_HH extends HyperHeuristic {
 
         int N = oProblem.getNumberOfHeuristics();
 //        int N = 5;
-        int tourSize = 2, tabuLength = 3;
+        int tourSize = 2, tabuLength = 2;
         int h,prevH,rmvH,p1,p2;
-//        int initialWaterLevel = 10, waterLevel=initialWaterLevel;
-//        boolean acceptOnce = false;
+        int initialWaterLevel = 0, waterLevel=initialWaterLevel;
+        boolean acceptOnce = false;
 
         HashSet<Integer> tabuSet = new HashSet<>();
-        HeuristicScore hScore = new HeuristicScore(N);
-        LateAcceptance lAccept = new LateAcceptance(10,5,rng);
 
         long iteration = 0;
         double initialIOM = 0.2,  iom = initialIOM;
@@ -42,20 +40,18 @@ public class SN_HH extends HyperHeuristic {
         double current,candidate,currentP1,currentP2;
 
 
-        oProblem.setMemorySize(NUM_POPULATION*2+1);
+        oProblem.setMemorySize(3);
+        oProblem.initialiseSolution(0);
+        oProblem.initialiseSolution(1);
 
-        for(int i = 0; i<NUM_POPULATION; i++){
-            oProblem.initialiseSolution(i);
-        }
-        if(NUM_POPULATION==1){
-            oProblem.initialiseSolution(1);
-        }
-
+        Double initialObjVal = oProblem.getBestSolutionValue();
+        LateAcceptance lAccept = new LateAcceptance(10,initialObjVal*1.1,rng);
+        HeuristicScore hScore = new HeuristicScore(N,initialObjVal*1.2);
 
         oProblem.setIntensityOfMutation(iom);
         oProblem.setDepthOfSearch(dos);
 
-        while (!hasTimeExpired()) {
+        while ( !hasTimeExpired()) {
 
             if(iteration<tabuLength){
                 rmvH = -1;
@@ -67,77 +63,52 @@ public class SN_HH extends HyperHeuristic {
 
             if (h < 5) {
 
-                for(int i = 0; i<NUM_POPULATION; i++){
-
-                    candidate = oProblem.applyHeuristic(h, i,2 );
-                    current = oProblem.getFunctionValue(i);
-
-                    if(candidate<= lAccept.getAverage()){
-
-                        lAccept.updateLateAcceptance(candidate);
-                        oProblem.copySolution(2, i);
-
-                        if(candidate<current){
-//                            System.out.printf("%d improved to %f (%f)\n",h,candidate,current);
-                            hScore.increaseScore(h,BigDecimal.valueOf(current-candidate));
-        //                        acceptOnce = true;
-                        }else{
-//                            System.out.printf("%d better than avg %f\n",h,candidate);
-                            hScore.updateTimeScore(h);
-                        }
-                    }else{
-//                        System.out.printf("%d worsen to %f\n",h,candidate);
-                        hScore.decreaseScore(h,BigDecimal.valueOf(candidate-current));
-                    }
-                }//end generation
+                candidate = oProblem.applyHeuristic(h, 0,2 );
 
             } else {
 
-                for(int i = 0; i<NUM_POPULATION; i++){
+                candidate = oProblem.applyHeuristic(h, 0, 1, 2);
+            }
 
-//                    p1 = tournamentSelection(tourSize,oProblem);
-//                    p2 = p1;
-//                    while(p2==p1) {
-//                        p2 = tournamentSelection(tourSize, oProblem);
-//                    }
-                    p1=0;p2=1;
-                    candidate = oProblem.applyHeuristic(h, p1, p2, 2);
 
-                    currentP1 = oProblem.getFunctionValue(p1);
-                    currentP2 = oProblem.getFunctionValue(p2);
-                    current = currentP1<currentP2? currentP1: currentP2;
+            currentP1 = oProblem.getFunctionValue(0);
+            currentP2 = oProblem.getFunctionValue(1);
+            current = currentP1<currentP2? currentP1: currentP2;
 
-                    if(candidate<= lAccept.getAverage()) {
-                        lAccept.updateLateAcceptance(candidate);
-                        if (currentP1 < currentP2) { //p1 is better than p2
-                            oProblem.copySolution(2, p2);
-                        } else {
-                            oProblem.copySolution(2, p1);
-                        }
-                        if (candidate < current) {
-//                            System.out.printf("%d decreased to %f\n",h,candidate);
-                            hScore.increaseScore(h, BigDecimal.valueOf(current - candidate));
-                            //                        acceptOnce = true;
-                        }else{
+//            current = oProblem.getFunctionValue(0);
+            if(candidate<= lAccept.getAverage()){
+
+                if (currentP1 < currentP2) { //p1 is better than p2
+                    oProblem.copySolution(2, 0);
+                } else {
+                    oProblem.copySolution(2, 1);
+                }
+
+                lAccept.updateLateAcceptance(candidate);
+
+                if(candidate<current){
+//                            System.out.printf("%d improved to %f (%f)\n",h,candidate,current);
+                    hScore.increaseScore(h,BigDecimal.valueOf(current-candidate));
+//                  acceptOnce = true;
+                }else{
 //                            System.out.printf("%d better than avg %f\n",h,candidate);
-                            hScore.updateTimeScore(h);
-                        }
-                    }
-                    else{
+                    hScore.updateTimeScore(h);
+                }
+                acceptOnce = true;
+            }else{
 //                        System.out.printf("%d worsen to %f\n",h,candidate);
-                        hScore.decreaseScore(h,BigDecimal.valueOf(candidate-current));
-                    }//end replacing
+                hScore.decreaseScore(h,BigDecimal.valueOf(candidate-current));
+            }
 
-                }//end for generation
-            }//end else
 
             iteration++;
-//
+
 //            if (acceptOnce){
+//                System.out.printf("Stucked for %d \n",waterLevel );
 //                acceptOnce = false;
 //                waterLevel = initialWaterLevel;
 //            }else{
-//                waterLevel--;
+//                waterLevel++;
 //            }
 //
 //            if(waterLevel == 0){
@@ -160,8 +131,9 @@ public class SN_HH extends HyperHeuristic {
             }
             System.out.printf("\n");
 
-//            hScore.printHScore();
         }//end while
+        hScore.printHScore();
+
 
 
         SolutionPrinter oSP = new SolutionPrinter("out.csv");
@@ -182,7 +154,7 @@ public class SN_HH extends HyperHeuristic {
     private int chooseHeuristic(int num_heuristics,int heuristicToRemoveFromTabu,HashSet<Integer> tabu, HeuristicScore hs){
 
         int choice = 0;
-        BigDecimal currentHScore = BigDecimal.ZERO;
+        BigDecimal currentHScore = BigDecimal.valueOf(Double.MIN_VALUE);
         BigDecimal bestScore = currentHScore;
         ArrayList<Integer> aloheuristic = new ArrayList<>();
         aloheuristic.add(0);
@@ -198,7 +170,7 @@ public class SN_HH extends HyperHeuristic {
                     aloheuristic.clear();
                     aloheuristic.add(heuristic);
                     choice=heuristic;
-                }else if(currentHScore == bestScore){
+                }else if(currentHScore.compareTo(bestScore) == 0){
                     aloheuristic.add(heuristic);
                 }
             }
