@@ -27,7 +27,7 @@ public class SN_HH extends HyperHeuristic {
 //        int N = 5;
         int tourSize = 2, tabuLength = 2;
         int h,prevH,rmvH,p1,p2;
-        int initialWaterLevel = 0, waterLevel=initialWaterLevel;
+        int initialWaterLevel = 0, waterLevel=initialWaterLevel, maxWaterLevel=0;
         boolean acceptOnce = false;
 
         HashSet<Integer> tabuSet = new HashSet<>();
@@ -89,12 +89,12 @@ public class SN_HH extends HyperHeuristic {
                 if(candidate<current){
 //                            System.out.printf("%d improved to %f (%f)\n",h,candidate,current);
                     hScore.increaseScore(h,BigDecimal.valueOf(current-candidate));
-//                  acceptOnce = true;
+                  acceptOnce = true;
                 }else{
 //                            System.out.printf("%d better than avg %f\n",h,candidate);
                     hScore.updateTimeScore(h);
                 }
-                acceptOnce = true;
+
             }else{
 //                        System.out.printf("%d worsen to %f\n",h,candidate);
                 hScore.decreaseScore(h,BigDecimal.valueOf(candidate-current));
@@ -103,12 +103,21 @@ public class SN_HH extends HyperHeuristic {
 
             iteration++;
 
-//            if (acceptOnce){
-//                System.out.printf("Stucked for %d \n",waterLevel );
-//                acceptOnce = false;
-//                waterLevel = initialWaterLevel;
-//            }else{
-//                waterLevel++;
+            if (acceptOnce){
+                System.out.printf("Stucked for %d \n",waterLevel );
+                acceptOnce = false;
+                if(waterLevel>maxWaterLevel){
+                    maxWaterLevel = waterLevel;
+                }
+                waterLevel = initialWaterLevel;
+//                oProblem.setIntensityOfMutation(initialIOM);
+            }else{
+                waterLevel++;
+            }
+
+//            if(waterLevel>20){
+//                iom*=1.01;
+//                oProblem.setIntensityOfMutation(iom);
 //            }
 //
 //            if(waterLevel == 0){
@@ -133,6 +142,7 @@ public class SN_HH extends HyperHeuristic {
 
         }//end while
         hScore.printHScore();
+        System.out.print(waterLevel);
 
 
 

@@ -16,15 +16,15 @@ public class HeuristicScore {
     private BigDecimal upperBound;
     private BigDecimal lowerBound;
 
-    public HeuristicScore(int numHeuristic,double initialObjVal){
+    public HeuristicScore(int numHeuristic,double bounds){
         this.numHeuristic = numHeuristic;
         indvScore = new BigDecimal[numHeuristic];
         timeScore = new BigDecimal[numHeuristic];
 
         Utilities.initialiseBigDecimalArray(indvScore,BigDecimal.ZERO);
         Utilities.initialiseBigDecimalArray(timeScore,BigDecimal.valueOf(5));
-        upperBound = BigDecimal.valueOf(initialObjVal*1.2);
-        lowerBound = BigDecimal.valueOf(initialObjVal*-1.2);
+        upperBound = BigDecimal.valueOf(bounds*1.2);
+        lowerBound = BigDecimal.valueOf(bounds*-1.2);
 
     }
 
@@ -49,14 +49,18 @@ public class HeuristicScore {
 
             }
         }
+
     }
 
     public void increaseScore(int hIndex, BigDecimal change){
 
 //        indvScore[hIndex] = indvScore[hIndex].add(indvWeight);
         indvScore[hIndex] = indvScore[hIndex].add(change);
+//        indvScore[hIndex] = indvScore[hIndex].multiply(BigDecimal.valueOf(1.2));
         if(indvScore[hIndex].compareTo(upperBound) == 1){
             indvScore[hIndex] = upperBound;
+//        } else if(indvScore[hIndex].compareTo(BigDecimal.ZERO) == -1){
+//            indvScore[hIndex] = BigDecimal.ZERO;
         }
         phi = BigDecimal.valueOf(0.99);
         updateTimeScore(hIndex);
@@ -65,6 +69,7 @@ public class HeuristicScore {
     public void decreaseScore(int hIndex, BigDecimal change){
 //        indvScore[hIndex] = indvScore[hIndex].subtract(indvWeight);
         indvScore[hIndex] = indvScore[hIndex].subtract(change);
+//        indvScore[hIndex] = indvScore[hIndex].multiply(BigDecimal.valueOf(0.8));
         if(indvScore[hIndex].compareTo(lowerBound) == -1){
             indvScore[hIndex] = lowerBound;
         }

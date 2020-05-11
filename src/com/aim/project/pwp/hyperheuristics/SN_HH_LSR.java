@@ -62,83 +62,49 @@ public class SN_HH_LSR extends HyperHeuristic {
             h = chooseHeuristic(mutationSet,mutationScore);
             oProblem.getHeuristicCallRecord()[(int)(iteration)%N] = h;
 
-
             candidate = oProblem.applyHeuristic(h, 0,2);
             current = oProblem.getFunctionValue(0);
 
-            if (candidate <= lAccept.getAverage()){
-
+            if(isAccepted(candidate,current,h,lAccept,mutationScore)){
                 oProblem.copySolution(2, 0);
                 acceptOnce = true;
-                if(candidate<current){
-                    mutationScore.increaseScore(h,BigDecimal.valueOf(current-candidate));
-                }else{
-                    mutationScore.updateTimeScore(h);
-                }
-
-            }else{
-                mutationScore.decreaseScore(h,BigDecimal.valueOf(candidate-current));
             }
-
-
+            System.out.print(mutationSet[h]);
             iteration++;
+//            mutationScore.printHScore();
 
-            if (acceptOnce&&rng.nextBoolean()){
+            if(acceptOnce){
                 acceptOnce = false;
-            }else{
-
-                prevH = chooseHeuristic(crossoverSet,crossoverScore);
+            }else {
+                prevH = chooseHeuristic(crossoverSet, crossoverScore);
                 candidate = oProblem.applyHeuristic(crossoverSet[prevH], 0, 1, 2);
-                h = chooseHeuristic(localSearchSet,ilsScore);
-                candidate = oProblem.applyHeuristic(localSearchSet[h],0,2);
+                h = chooseHeuristic(localSearchSet, ilsScore);
+                candidate = oProblem.applyHeuristic(localSearchSet[h], 2, 2);
                 currentP1 = oProblem.getFunctionValue(0);
                 currentP2 = oProblem.getFunctionValue(1);
-                current = currentP1<currentP2? currentP1: currentP2;
+                current = currentP1 < currentP2 ? currentP1 : currentP2;
 
-                if(candidate<= lAccept.getAverage()){
-
-                    lAccept.updateLateAcceptance(candidate);
+                if (isAccepted(current, candidate, prevH, h, lAccept, crossoverScore, ilsScore)) {
                     if (currentP1 < currentP2) { //p1 is better than p2
                         oProblem.copySolution(2, 0);
                     } else {
                         oProblem.copySolution(2, 1);
                     }
-
-                    if(candidate<current){
-//                            System.out.printf("%d improved to %f (%f)\n",h,candidate,current);
-                        crossoverScore.increaseScore(prevH,BigDecimal.valueOf(current-candidate));
-                        ilsScore.increaseScore(h,BigDecimal.valueOf(current-candidate));
-//                  acceptOnce = true;
-                    }else{
-//                            System.out.printf("%d better than avg %f\n",h,candidate);
-                        crossoverScore.updateTimeScore(prevH);
-                        ilsScore.updateTimeScore(h);
-                    }
-                    acceptOnce = true;
-                }else{
-//                        System.out.printf("%d worsen to %f\n",h,candidate);
-                    crossoverScore.decreaseScore(prevH,BigDecimal.valueOf(candidate-current));
-                    ilsScore.decreaseScore(h,BigDecimal.valueOf(candidate-current));
                 }
-
+                System.out.print(crossoverSet[prevH]);
+                System.out.print(localSearchSet[h]);
             }
-
-            h = chooseHeuristic(localSearchSet,ilsScore);
-            candidate = oProblem.applyHeuristic(localSearchSet[h],0,2);
+            h = chooseHeuristic(localSearchSet, ilsScore);
+            candidate = oProblem.applyHeuristic(localSearchSet[h], 0, 2);
             current = oProblem.getFunctionValue(0);
-            if (candidate <= lAccept.getAverage()){
 
+
+            if (isAccepted(current, candidate, h, lAccept, ilsScore)) {
                 oProblem.copySolution(2, 0);
-                acceptOnce = true;
-                if(candidate<current){
-                    ilsScore.increaseScore(h,BigDecimal.valueOf(current-candidate));
-                }else{
-                    ilsScore.updateTimeScore(h);
-                }
-
-            }else{
-                ilsScore.decreaseScore(h,BigDecimal.valueOf(candidate-current));
             }
+            System.out.print(localSearchSet[h]);
+            System.out.println(' ');
+
 
         }//end while
 
@@ -186,6 +152,41 @@ public class SN_HH_LSR extends HyperHeuristic {
         return choice;
     }
 
+    private boolean isAccepted(double current, double candidate, int heuristicChoice, LateAcceptance lAccept, HeuristicScore hScore){
+        if (candidate <= lAccept.getAverage()){
+
+            lAccept.updateLateAcceptance(candidate);
+            if(candidate<current){
+                hScore.increaseScore(heuristicChoice,BigDecimal.valueOf(current-candidate));
+            }else{
+                hScore.decreaseScore(heuristicChoice,BigDecimal.valueOf(candidate-current));
+            }
+            return true;
+        }
+        hScore.updateTimeScore(heuristicChoice);
+        return false;
+
+    }
+
+    private boolean isAccepted(double current, double candidate, int h1,int h2, LateAcceptance lAccept, HeuristicScore hS1, HeuristicScore hS2){
+        if (candidate <= lAccept.getAverage()){
+
+            lAccept.updateLateAcceptance(candidate);
+            if(candidate<current){
+                hS1.increaseScore(h1,BigDecimal.valueOf(current-candidate));
+                hS2.increaseScore(h2,BigDecimal.valueOf(current-candidate));
+            }else{
+                hS1.updateTimeScore(h1);
+                hS2.updateTimeScore(h2);
+            }
+            return true;
+
+        }else{
+            hS1.decreaseScore(h1,BigDecimal.valueOf(candidate-current));
+            hS2.decreaseScore(h2,BigDecimal.valueOf(candidate-current));
+            return false;
+        }
+    }
 
 //    private void replaceWorst(ProblemDomain oProb,int N, int c){
 //        int worstIndex = 0;
