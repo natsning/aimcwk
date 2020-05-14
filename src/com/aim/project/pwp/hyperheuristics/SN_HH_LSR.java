@@ -126,8 +126,8 @@ public class SN_HH_LSR extends HyperHeuristic {
 
         int num_heuristics=heuristicSet.length;
         int choice = 0;
-        BigDecimal currentHScore = BigDecimal.valueOf(Double.MIN_VALUE);
-        BigDecimal bestScore = currentHScore;
+        double currentHScore = Double.MIN_VALUE;
+        double bestScore = currentHScore;
         ArrayList<Integer> aloheuristic = new ArrayList<>();
         aloheuristic.add(0);
 
@@ -135,12 +135,12 @@ public class SN_HH_LSR extends HyperHeuristic {
 
             currentHScore = hs.getOverallHScore(heuristic);
 
-            if( currentHScore.compareTo(bestScore) == 1){
+            if( currentHScore>bestScore){
                 bestScore = hs.getOverallHScore(heuristic);
                 aloheuristic.clear();
                 aloheuristic.add(heuristic);
                 choice=heuristic;
-            }else if(currentHScore.compareTo(bestScore) == 0){
+            }else if(currentHScore==bestScore){
                 aloheuristic.add(heuristic);
             }
 
@@ -157,9 +157,9 @@ public class SN_HH_LSR extends HyperHeuristic {
 
             lAccept.updateLateAcceptance(candidate);
             if(candidate<current){
-                hScore.increaseScore(heuristicChoice,BigDecimal.valueOf(current-candidate));
+                hScore.increaseScore(heuristicChoice,current-candidate);
             }else{
-                hScore.decreaseScore(heuristicChoice,BigDecimal.valueOf(candidate-current));
+                hScore.decreaseScore(heuristicChoice,candidate-current);
             }
             return true;
         }
@@ -173,8 +173,8 @@ public class SN_HH_LSR extends HyperHeuristic {
 
             lAccept.updateLateAcceptance(candidate);
             if(candidate<current){
-                hS1.increaseScore(h1,BigDecimal.valueOf(current-candidate));
-                hS2.increaseScore(h2,BigDecimal.valueOf(current-candidate));
+                hS1.increaseScore(h1,current-candidate);
+                hS2.increaseScore(h2,current-candidate);
             }else{
                 hS1.updateTimeScore(h1);
                 hS2.updateTimeScore(h2);
@@ -182,8 +182,8 @@ public class SN_HH_LSR extends HyperHeuristic {
             return true;
 
         }else{
-            hS1.decreaseScore(h1,BigDecimal.valueOf(candidate-current));
-            hS2.decreaseScore(h2,BigDecimal.valueOf(candidate-current));
+            hS1.decreaseScore(h1,candidate-current);
+            hS2.decreaseScore(h2,candidate-current);
             return false;
         }
     }

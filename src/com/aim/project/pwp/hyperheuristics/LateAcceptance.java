@@ -1,5 +1,7 @@
 package com.aim.project.pwp.hyperheuristics;
 
+import com.aim.project.pwp.Utilities;
+
 import java.util.Arrays;
 import java.util.Random;
 
@@ -8,24 +10,30 @@ public class LateAcceptance {
     private int num;
     private int pointIndex;
     private int updateIndex = 0;
+    private double sum;
 
     public LateAcceptance(int degreeOfLateness,double defaultValue, Random rng){
         num = degreeOfLateness;
         pointIndex = rng.nextInt(num-1)+1; //does not start from 0
 
         aoObjectiveValues = new double[degreeOfLateness];
-        for(int i=0; i<num; i++){
+        for (int i=0; i < num; i++){
             aoObjectiveValues[i] = defaultValue;
         }
 
+        sum = defaultValue*num;
     }
 
     public void updateLateAcceptance(double objVal ){
-        aoObjectiveValues[updateIndex++%num] = objVal;
+        sum = sum - aoObjectiveValues[updateIndex] + objVal;
+        aoObjectiveValues[updateIndex++] = objVal;
+        if(updateIndex==num){
+            updateIndex=0;
+        }
     }
 
     public double getAverage( ){
-        return Arrays.stream(aoObjectiveValues).sum()/(double)num;
+        return sum/(double)num;
     }
 
     public double getDelayedObjVal(){

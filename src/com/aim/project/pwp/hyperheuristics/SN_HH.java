@@ -30,6 +30,7 @@ public class SN_HH extends HyperHeuristic {
         int initialWaterLevel = 0, waterLevel=initialWaterLevel, maxWaterLevel=0;
         boolean acceptOnce = false;
         int[] aoHIndex = oProblem.getHeuristicsOfType(ProblemDomain.HeuristicType.OTHER);
+        int[] aoMutation = oProblem.getHeuristicsThatUseIntensityOfMutation();
         HashSet<Integer> tabuSet = new HashSet<>();
 
         long iteration = 0;
@@ -46,33 +47,35 @@ public class SN_HH extends HyperHeuristic {
 
         Double initialObjVal = oProblem.getBestSolutionValue();
         LateAcceptance lAccept = new LateAcceptance(10,initialObjVal*1.1,rng);
-        HeuristicScore hScore = new HeuristicScore(N,initialObjVal*1.2);
+        HeuristicScore hScore = new HeuristicScore(aoMutation.length,initialObjVal*1.2);
 
         oProblem.setIntensityOfMutation(iom);
         oProblem.setDepthOfSearch(dos);
 
         while ( !hasTimeExpired()) {
-
-            if(iteration<tabuLength){
-                rmvH = -1;
-            }else{
-                rmvH = oProblem.getHeuristicCallRecord()[(int)(iteration-tabuLength)%N];
-            }
+//
+//            if(iteration<tabuLength){
+//                rmvH = -1;
+//            }else{
+//                rmvH = oProblem.getHeuristicCallRecord()[(int)(iteration-tabuLength)%N];
+//            }
 //            h = chooseHeuristic(N,rmvH,tabuSet,hScore);
-            h = rouletteWheel(aoHIndex,hScore);
-            oProblem.getHeuristicCallRecord()[(int)iteration%N] = h;
+            h = rouletteWheel(aoMutation,hScore);
+            oProblem.getHeuristicCallRecord()[(int)iteration%N] = aoMutation[h];
 
-            if (h < 5) {
+            if (h < 3) {
 
-                candidate = oProblem.applyHeuristic(h, 0,2 );
+                candidate = oProblem.applyHeuristic(aoMutation[h], 0,2 );
 
 
             } else {
 
-                oProblem.initialiseSolution(1);
-                candidate = oProblem.applyHeuristic(h, 0, 1, 2);
+                candidate = oProblem.applyHeuristic(aoMutation[h], 0, 1, 2);
+
             }
 
+
+            oProblem.applyHeuristic(oProblem.getHeuristicsThatUseDepthOfSearch()[rng.nextInt(2)],2,2);
 
             current = oProblem.getFunctionValue(0);
             if(candidate<= lAccept.getAverage()){
@@ -81,23 +84,19 @@ public class SN_HH extends HyperHeuristic {
                 lAccept.updateLateAcceptance(candidate);
 
                 if(candidate<current){
-//                            System.out.printf("%d improved to %f (%f)\n",h,candidate,current);
-                    hScore.increaseScore(h,BigDecimal.valueOf(current-candidate));
-//                  acceptOnce = true;
+                    hScore.increaseScore(h,current-candidate);
                 }else{
-//                            System.out.printf("%d better than avg %f\n",h,candidate);
                     hScore.updateTimeScore(h);
                 }
 
             }else{
-//                        System.out.printf("%d worsen to %f\n",h,candidate);
                 delta = candidate-current;
                 if(delta <= 0){
-                    delta = initialObjVal*0.05;
+                    delta = initialObjVal*0.1;
+                    oProblem.copySolution(2,1);
                 }
-                hScore.decreaseScore(h,BigDecimal.valueOf(delta));
+                hScore.decreaseScore(h,delta);
             }
-
 
             iteration++;
 
@@ -140,7 +139,7 @@ public class SN_HH extends HyperHeuristic {
 
         }//end while
         hScore.printHScore();
-        System.out.print(waterLevel);
+//        System.out.print(waterLevel);
 
 
 
@@ -162,8 +161,8 @@ public class SN_HH extends HyperHeuristic {
     private int chooseHeuristic(int num_heuristics,int heuristicToRemoveFromTabu,HashSet<Integer> tabu, HeuristicScore hs){
 
         int choice = 0;
-        BigDecimal currentHScore = BigDecimal.valueOf(Double.MIN_VALUE);
-        BigDecimal bestScore = currentHScore;
+        double currentHScore = Double.MIN_VALUE;
+        double bestScore = currentHScore;
         ArrayList<Integer> aloheuristic = new ArrayList<>();
         aloheuristic.add(0);
 
@@ -173,12 +172,12 @@ public class SN_HH extends HyperHeuristic {
 
                 currentHScore = hs.getOverallHScore(heuristic);
 
-                if( currentHScore.compareTo(bestScore) == 1){
+                if( currentHScore>bestScore){
                     bestScore = hs.getOverallHScore(heuristic);
                     aloheuristic.clear();
                     aloheuristic.add(heuristic);
                     choice=heuristic;
-                }else if(currentHScore.compareTo(bestScore) == 0){
+                }else if(currentHScore==bestScore){
                     aloheuristic.add(heuristic);
                 }
             }
@@ -207,7 +206,7 @@ public class SN_HH extends HyperHeuristic {
         Double[] aohScores = new Double[hSet.length];
         Double sum = 0.0;
         for(int i=0; i< hSet.length; i++){
-            aohScores[i] = heuristicScore.getOverallHScore(hSet[i]).doubleValue();
+            aohScores[i] = heuristicScore.getOverallHScore(i);
             sum += aohScores[i];
         }
         Double r = rng.nextDouble() * sum;
@@ -215,9 +214,10 @@ public class SN_HH extends HyperHeuristic {
         for(int i =0; i<hSet.length; i++){
             cumulative+= aohScores[i];
             if(r<cumulative) {
-                return hSet[i];
+                return i;
             }
         }
+        System.out.print(sum);
         return -1;
     }
     private int tournamentSelection(int tourSize, ProblemDomain oProb){
