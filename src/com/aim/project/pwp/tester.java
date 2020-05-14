@@ -43,12 +43,29 @@ public class tester {
 //            la.printArray();
 //            System.out.println(la.getDelayedObjVal());
 //        }
-        BigDecimal a = BigDecimal.ONE;
-        BigDecimal b = BigDecimal.TEN;
-        if(b.compareTo(b) == 0)
-            System.out.println('s');
+//        BigDecimal a = BigDecimal.ONE;
+//        BigDecimal b = BigDecimal.TEN;
+//        if(b.compareTo(b) == 0)
+//            System.out.println('s');
+        roulleteWheel();
 
 
+
+    }
+    private static int roulleteWheel(){
+        Double[] aohScores = {0.1,0.2};
+        Double sum = 0.3;
+        Double r = new Random().nextDouble() * sum;
+        Double cumulative = 0.0;
+        for(int i =0; i<2; i++){
+            cumulative+= aohScores[i];
+            System.out.printf("%f , %f\n",r,cumulative);
+            if(r<cumulative) {
+                System.out.print(i);
+                return i;
+            }
+        }
+        return -1;
     }
 }
     //cd Y2S2-AIM/cw/cwk/src/com/aim/project/pwp

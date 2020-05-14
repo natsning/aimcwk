@@ -133,8 +133,7 @@ public class AIM_PWP extends ProblemDomain implements Visualisable {
 		
 		// TODO return an array of heuristic IDs based on the heuristic's type.
 		if(type == HeuristicType.MUTATION){
-		    int[] x = {0,1,2};
-			return x;
+			return getHeuristicsThatUseIntensityOfMutation();
 		}
 		else if(type == HeuristicType.LOCAL_SEARCH){
 			return getHeuristicsThatUseDepthOfSearch();
@@ -145,6 +144,12 @@ public class AIM_PWP extends ProblemDomain implements Visualisable {
 		else if(type == HeuristicType.RUIN_RECREATE){
 
 			return new int[]{};
+		}else if( type == HeuristicType.OTHER){
+			int[] all = new int[getNumberOfHeuristics()];
+			for(int i=0; i<getNumberOfHeuristics(); i++){
+				all[i] = i;
+			}
+			return all;
 		}else{
 			return new int[]{};
 		}

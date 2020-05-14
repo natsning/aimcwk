@@ -24,20 +24,12 @@ public class HeuristicScore {
         Utilities.initialiseBigDecimalArray(indvScore,BigDecimal.ZERO);
         Utilities.initialiseBigDecimalArray(timeScore,BigDecimal.valueOf(5));
         upperBound = BigDecimal.valueOf(bounds*1.2);
-        lowerBound = BigDecimal.valueOf(bounds*-1.2);
+        lowerBound = BigDecimal.ZERO;
 
     }
 
     public BigDecimal getIndvScore(int hIndex){
         return indvScore[hIndex].divide(timeScore[hIndex],10, RoundingMode.CEILING);
-    }
-
-//    public double getPairScore(int prevHIndex, int hIndex){
-//        return pairScore[prevHIndex][hIndex];
-//    }
-
-    public BigDecimal getTimeScore(int hIndex){
-        return timeScore[hIndex];
     }
 
     public void updateTimeScore(int chosenHIndex){
@@ -49,18 +41,16 @@ public class HeuristicScore {
 
             }
         }
-
     }
+
+
 
     public void increaseScore(int hIndex, BigDecimal change){
 
 //        indvScore[hIndex] = indvScore[hIndex].add(indvWeight);
         indvScore[hIndex] = indvScore[hIndex].add(change);
-//        indvScore[hIndex] = indvScore[hIndex].multiply(BigDecimal.valueOf(1.2));
         if(indvScore[hIndex].compareTo(upperBound) == 1){
             indvScore[hIndex] = upperBound;
-//        } else if(indvScore[hIndex].compareTo(BigDecimal.ZERO) == -1){
-//            indvScore[hIndex] = BigDecimal.ZERO;
         }
         phi = BigDecimal.valueOf(0.99);
         updateTimeScore(hIndex);
@@ -69,7 +59,6 @@ public class HeuristicScore {
     public void decreaseScore(int hIndex, BigDecimal change){
 //        indvScore[hIndex] = indvScore[hIndex].subtract(indvWeight);
         indvScore[hIndex] = indvScore[hIndex].subtract(change);
-//        indvScore[hIndex] = indvScore[hIndex].multiply(BigDecimal.valueOf(0.8));
         if(indvScore[hIndex].compareTo(lowerBound) == -1){
             indvScore[hIndex] = lowerBound;
         }
@@ -88,8 +77,8 @@ public class HeuristicScore {
     }
 
     public BigDecimal getOverallHScore(int hIndex){
-        return (getIndvScore(hIndex).multiply(phi).add((BigDecimal.valueOf(1).subtract(phi)).multiply(getTimeScore(hIndex))));
 //        return (getIndvScore(hIndex).add(getTimeScore(hIndex)));
+        return getIndvScore(hIndex).multiply(phi).add((BigDecimal.valueOf(1).subtract(phi)).multiply(timeScore[hIndex]));
     }
 
     public void printHScore(){

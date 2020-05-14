@@ -26,10 +26,10 @@ public class SN_HH extends HyperHeuristic {
         int N = oProblem.getNumberOfHeuristics();
 //        int N = 5;
         int tourSize = 2, tabuLength = 2;
-        int h,prevH,rmvH,p1,p2;
+        int h,prevH,rmvH,p1,p2,indexToReplace;
         int initialWaterLevel = 0, waterLevel=initialWaterLevel, maxWaterLevel=0;
         boolean acceptOnce = false;
-
+        int[] aoHIndex = oProblem.getHeuristicsOfType(ProblemDomain.HeuristicType.OTHER);
         HashSet<Integer> tabuSet = new HashSet<>();
 
         long iteration = 0;
@@ -37,7 +37,7 @@ public class SN_HH extends HyperHeuristic {
         double initialDOS = 0.5, dos = initialDOS;
 //        double initialTemp = 0.1, temp = initialTemp;
 //        double alpha = 0.01, beta = 0.8;
-        double current,candidate,currentP1,currentP2;
+        double current,candidate,delta;
 
 
         oProblem.setMemorySize(3);
@@ -58,38 +58,32 @@ public class SN_HH extends HyperHeuristic {
             }else{
                 rmvH = oProblem.getHeuristicCallRecord()[(int)(iteration-tabuLength)%N];
             }
-            h = chooseHeuristic(N,rmvH,tabuSet,hScore);
+//            h = chooseHeuristic(N,rmvH,tabuSet,hScore);
+            h = rouletteWheel(aoHIndex,hScore);
             oProblem.getHeuristicCallRecord()[(int)iteration%N] = h;
 
             if (h < 5) {
 
                 candidate = oProblem.applyHeuristic(h, 0,2 );
 
+
             } else {
 
+                oProblem.initialiseSolution(1);
                 candidate = oProblem.applyHeuristic(h, 0, 1, 2);
             }
 
 
-            currentP1 = oProblem.getFunctionValue(0);
-            currentP2 = oProblem.getFunctionValue(1);
-            current = currentP1<currentP2? currentP1: currentP2;
-
-//            current = oProblem.getFunctionValue(0);
+            current = oProblem.getFunctionValue(0);
             if(candidate<= lAccept.getAverage()){
 
-                if (currentP1 < currentP2) { //p1 is better than p2
-                    oProblem.copySolution(2, 0);
-                } else {
-                    oProblem.copySolution(2, 1);
-                }
-
+                oProblem.copySolution(2,0);
                 lAccept.updateLateAcceptance(candidate);
 
                 if(candidate<current){
 //                            System.out.printf("%d improved to %f (%f)\n",h,candidate,current);
                     hScore.increaseScore(h,BigDecimal.valueOf(current-candidate));
-                  acceptOnce = true;
+//                  acceptOnce = true;
                 }else{
 //                            System.out.printf("%d better than avg %f\n",h,candidate);
                     hScore.updateTimeScore(h);
@@ -97,23 +91,27 @@ public class SN_HH extends HyperHeuristic {
 
             }else{
 //                        System.out.printf("%d worsen to %f\n",h,candidate);
-                hScore.decreaseScore(h,BigDecimal.valueOf(candidate-current));
+                delta = candidate-current;
+                if(delta <= 0){
+                    delta = initialObjVal*0.05;
+                }
+                hScore.decreaseScore(h,BigDecimal.valueOf(delta));
             }
 
 
             iteration++;
 
-            if (acceptOnce){
-                System.out.printf("Stucked for %d \n",waterLevel );
-                acceptOnce = false;
-                if(waterLevel>maxWaterLevel){
-                    maxWaterLevel = waterLevel;
-                }
-                waterLevel = initialWaterLevel;
-//                oProblem.setIntensityOfMutation(initialIOM);
-            }else{
-                waterLevel++;
-            }
+//            if (acceptOnce){
+//                System.out.printf("Stucked for %d \n",waterLevel );
+//                acceptOnce = false;
+//                if(waterLevel>maxWaterLevel){
+//                    maxWaterLevel = waterLevel;
+//                }
+//                waterLevel = initialWaterLevel;
+////                oProblem.setIntensityOfMutation(initialIOM);
+//            }else{
+//                waterLevel++;
+//            }
 
 //            if(waterLevel>20){
 //                iom*=1.01;
@@ -205,6 +203,23 @@ public class SN_HH extends HyperHeuristic {
 
     }
 
+    private int rouletteWheel(int[] hSet,HeuristicScore heuristicScore){
+        Double[] aohScores = new Double[hSet.length];
+        Double sum = 0.0;
+        for(int i=0; i< hSet.length; i++){
+            aohScores[i] = heuristicScore.getOverallHScore(hSet[i]).doubleValue();
+            sum += aohScores[i];
+        }
+        Double r = rng.nextDouble() * sum;
+        Double cumulative = 0.0;
+        for(int i =0; i<hSet.length; i++){
+            cumulative+= aohScores[i];
+            if(r<cumulative) {
+                return hSet[i];
+            }
+        }
+        return -1;
+    }
     private int tournamentSelection(int tourSize, ProblemDomain oProb){
         //shuffles the index of each solution
         int[] perm = new int[NUM_POPULATION];
