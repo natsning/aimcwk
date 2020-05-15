@@ -47,8 +47,16 @@ public class tester {
 //        BigDecimal b = BigDecimal.TEN;
 //        if(b.compareTo(b) == 0)
 //            System.out.println('s');
-        roulleteWheel();
+//        roulleteWheel();
+            long start = System.nanoTime();
+            for(int i = 1; i%6 != 0; i++ );
+            System.out.println(System.nanoTime()-start);
 
+            long start2 = System.nanoTime();
+            for(int i=1; i<10; i++){
+                if(i == 6) break;
+            }
+            System.out.print(System.nanoTime()-start2);
 
 
     }

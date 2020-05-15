@@ -23,7 +23,7 @@ public class Utilities {
         return array;
     }
 
-    public static void initialiseDoubleArray(double[] arr, int element){
+    public static void initialiseDoubleArray(double[] arr, double element){
         for( int i=0; i< arr.length; i++){
             arr[i] = element;
         }

@@ -2,8 +2,6 @@ package com.aim.project.pwp.hyperheuristics;
 
 import com.aim.project.pwp.Utilities;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 public class HeuristicScore {
 
@@ -13,56 +11,72 @@ public class HeuristicScore {
     private double phi = 0.99;
     private double upperBound;
     private double lowerBound;
+    private double sum;
+    private double timeDefaultValue = 1;
 
     public HeuristicScore(int numHeuristic,double bounds){
         this.numHeuristic = numHeuristic;
         indvScore = new double[numHeuristic];
         timeScore = new double[numHeuristic];
-        Utilities.initialiseDoubleArray(timeScore,1);
-        upperBound = bounds*1.2;
         lowerBound = 0;
+        upperBound = bounds*1.2;
+        Utilities.initialiseDoubleArray(timeScore,timeDefaultValue);
+        Utilities.initialiseDoubleArray(indvScore,lowerBound);
+        sum = numHeuristic*lowerBound + numHeuristic*timeDefaultValue;
 
     }
 
     public double getIndvScore(int hIndex){
-        return indvScore[hIndex]/timeScore[hIndex];
+        return indvScore[hIndex];
     }
 
     public void updateTimeScore(int chosenHIndex){
         for(int i = 0; i<numHeuristic; i++){
             if(i == chosenHIndex) {
+                if(timeScore[chosenHIndex]>1){
+                    sum -= (timeScore[chosenHIndex]-1);
+                }
                 timeScore[chosenHIndex] = 1;
-            }else if(i==3 || i==4){
+            }else if(i==3 || i==4){ //ensuring crossover has lower count
                 continue;
             }else{
                 timeScore[i] += 1;
+                sum += 1;
+
             }
         }
+
     }
-
-
 
     public void increaseScore(int hIndex, double change){
 
-//        indvScore[hIndex] = indvScore[hIndex].add(indvWeight);
-        if(indvScore[hIndex]==lowerBound){
+        updateTimeScore(hIndex);
+
+        if(indvScore[hIndex]== lowerBound){
+            sum += (0.5*upperBound - lowerBound);
             indvScore[hIndex] = 0.5*upperBound;
+
         }else {
             indvScore[hIndex] += 0.1*change;
+            sum+= 0.1*change;
             if (indvScore[hIndex] > upperBound) {
+                sum -= (indvScore[hIndex]-upperBound);
                 indvScore[hIndex] = upperBound;
             }
         }
-        updateTimeScore(hIndex);
     }
 
     public void decreaseScore(int hIndex, double change){
-//        indvScore[hIndex] = indvScore[hIndex].subtract(indvWeight);
+
+        updateTimeScore(hIndex);
+
         indvScore[hIndex] -= 0.1*change;
+        sum -= (0.1*change);
         if(indvScore[hIndex] < lowerBound){
+            sum += (lowerBound - indvScore[hIndex]);
             indvScore[hIndex] = lowerBound;
         }
-        updateTimeScore(hIndex);
+
     }
 
     public double getOverallHScore(int hIndex){
@@ -70,10 +84,15 @@ public class HeuristicScore {
         return getIndvScore(hIndex) + timeScore[hIndex] ;
     }
 
+    public double getSum(){
+        return sum;
+    }
+
     public void printHScore(){
         for(int i=0; i<numHeuristic; i++){
             System.out.printf("%d: %.5f %.5f %.5f\n",i,indvScore[i],timeScore[i],getOverallHScore(i));
         }
+
     }
 
 }

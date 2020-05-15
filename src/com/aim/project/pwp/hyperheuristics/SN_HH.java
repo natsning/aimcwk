@@ -23,23 +23,12 @@ public class SN_HH extends HyperHeuristic {
     @Override
     protected void solve(ProblemDomain oProblem) {
 
-        int N = oProblem.getNumberOfHeuristics();
-//        int N = 5;
-        int tourSize = 2, tabuLength = 2;
-        int h,prevH,rmvH,p1,p2,indexToReplace;
-        int initialWaterLevel = 0, waterLevel=initialWaterLevel, maxWaterLevel=0;
-        boolean acceptOnce = false;
+
         int[] aoHIndex = oProblem.getHeuristicsOfType(ProblemDomain.HeuristicType.OTHER);
         int[] aoMutation = oProblem.getHeuristicsThatUseIntensityOfMutation();
-        HashSet<Integer> tabuSet = new HashSet<>();
-
         long iteration = 0;
-        double initialIOM = 0.2,  iom = initialIOM;
-        double initialDOS = 0.5, dos = initialDOS;
-//        double initialTemp = 0.1, temp = initialTemp;
-//        double alpha = 0.01, beta = 0.8;
         double current,candidate,delta;
-
+        int h;
 
         oProblem.setMemorySize(3);
         oProblem.initialiseSolution(0);
@@ -49,19 +38,14 @@ public class SN_HH extends HyperHeuristic {
         LateAcceptance lAccept = new LateAcceptance(10,initialObjVal*1.1,rng);
         HeuristicScore hScore = new HeuristicScore(aoMutation.length,initialObjVal*1.2);
 
-        oProblem.setIntensityOfMutation(iom);
-        oProblem.setDepthOfSearch(dos);
+        oProblem.setIntensityOfMutation(0.2);
+        oProblem.setDepthOfSearch(0.5);
+
+        double[] aoHScore = new double[aoMutation.length];
 
         while ( !hasTimeExpired()) {
-//
-//            if(iteration<tabuLength){
-//                rmvH = -1;
-//            }else{
-//                rmvH = oProblem.getHeuristicCallRecord()[(int)(iteration-tabuLength)%N];
-//            }
-//            h = chooseHeuristic(N,rmvH,tabuSet,hScore);
+
             h = rouletteWheel(aoMutation,hScore);
-            oProblem.getHeuristicCallRecord()[(int)iteration%N] = aoMutation[h];
 
             if (h < 3) {
 
@@ -100,47 +84,7 @@ public class SN_HH extends HyperHeuristic {
 
             iteration++;
 
-//            if (acceptOnce){
-//                System.out.printf("Stucked for %d \n",waterLevel );
-//                acceptOnce = false;
-//                if(waterLevel>maxWaterLevel){
-//                    maxWaterLevel = waterLevel;
-//                }
-//                waterLevel = initialWaterLevel;
-////                oProblem.setIntensityOfMutation(initialIOM);
-//            }else{
-//                waterLevel++;
-//            }
-
-//            if(waterLevel>20){
-//                iom*=1.01;
-//                oProblem.setIntensityOfMutation(iom);
-//            }
-//
-//            if(waterLevel == 0){
-//                initialWaterLevel += 10;
-//                waterLevel = initialWaterLevel;
-//                hScore.resetScore();
-//                for (int i: oProblem.getHeuristicsThatUseIntensityOfMutation()){
-//                    hScore.boostScore(i);
-//                }
-
-//            }else{
-//                temp = coolTemperature(temp,alpha);
-//                iom*= beta;
-//                dos*= beta;
-//                oProblem.setIntensityOfMutation(iom);
-//                oProblem.setDepthOfSearch(dos);
-//            }
-            for(int rec: oProblem.getHeuristicCallRecord()){
-                System.out.print(rec);
-            }
-            System.out.printf("\n");
-
         }//end while
-        hScore.printHScore();
-//        System.out.print(waterLevel);
-
 
 
         SolutionPrinter oSP = new SolutionPrinter("out.csv");
@@ -202,22 +146,19 @@ public class SN_HH extends HyperHeuristic {
 
     }
 
-    private int rouletteWheel(int[] hSet,HeuristicScore heuristicScore){
-        Double[] aohScores = new Double[hSet.length];
-        Double sum = 0.0;
-        for(int i=0; i< hSet.length; i++){
-            aohScores[i] = heuristicScore.getOverallHScore(i);
-            sum += aohScores[i];
-        }
-        Double r = rng.nextDouble() * sum;
+    private int rouletteWheel(int[] hSet, HeuristicScore heuristicScore){
+
+        Double r = rng.nextDouble() * heuristicScore.getSum();
         Double cumulative = 0.0;
         for(int i =0; i<hSet.length; i++){
-            cumulative+= aohScores[i];
+            cumulative+= heuristicScore.getOverallHScore(i);
             if(r<cumulative) {
                 return i;
             }
         }
-        System.out.print(sum);
+
+        System.out.println(r);
+        System.out.println(cumulative);
         return -1;
     }
     private int tournamentSelection(int tourSize, ProblemDomain oProb){
