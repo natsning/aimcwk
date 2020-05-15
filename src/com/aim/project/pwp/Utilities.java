@@ -1,6 +1,5 @@
 package com.aim.project.pwp;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -21,6 +20,14 @@ public class Utilities {
             array[i] = al.get(i);
         }
         return array;
+    }
+
+    public static ArrayList<Integer> convertArrayToArrayList(int[] arr){
+        ArrayList<Integer> al = new ArrayList<>();
+        for(int i: arr){
+            al.add(i);
+        }
+        return al;
     }
 
     public static void initialiseDoubleArray(double[] arr, double element){

@@ -2,6 +2,8 @@ package com.aim.project.pwp.hyperheuristics;
 
 import com.aim.project.pwp.Utilities;
 
+import java.util.ArrayList;
+
 
 public class HeuristicScore {
 
@@ -13,13 +15,15 @@ public class HeuristicScore {
     private double lowerBound;
     private double sum;
     private double timeDefaultValue = 1;
+    private ArrayList<Integer> restricted;
 
-    public HeuristicScore(int numHeuristic,double bounds){
+    public HeuristicScore(int numHeuristic,double bounds, int[] restrictHeuristic){
         this.numHeuristic = numHeuristic;
         indvScore = new double[numHeuristic];
         timeScore = new double[numHeuristic];
         lowerBound = 0;
         upperBound = bounds*1.2;
+        restricted = Utilities.convertArrayToArrayList(restrictHeuristic);
         Utilities.initialiseDoubleArray(timeScore,timeDefaultValue);
         Utilities.initialiseDoubleArray(indvScore,lowerBound);
         sum = numHeuristic*lowerBound + numHeuristic*timeDefaultValue;
@@ -37,9 +41,8 @@ public class HeuristicScore {
                     sum -= (timeScore[chosenHIndex]-1);
                 }
                 timeScore[chosenHIndex] = 1;
-            }else if(i==3 || i==4){ //ensuring crossover has lower count
-                continue;
-            }else{
+            }else if(!restricted.contains(i)){
+
                 timeScore[i] += 1;
                 sum += 1;
 
