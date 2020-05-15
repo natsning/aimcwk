@@ -27,7 +27,7 @@ public class DavissHillClimbing extends HeuristicOperators implements HeuristicI
 	public double apply(PWPSolutionInterface oSolution, double dDepthOfSearch, double dIntensityOfMutation) {
 		int times = (int)Math.floor(dDepthOfSearch/ 0.2) + 1;
 		int index = 0;
-		int indexToSwap,adjacentIndex;
+		int indexToSwap;
 		double newCost = 0;
 		double originalCost = oSolution.getObjectiveFunctionValue();
 		int[] city_ids = oSolution.getSolutionRepresentation().getSolutionRepresentation();
@@ -37,8 +37,7 @@ public class DavissHillClimbing extends HeuristicOperators implements HeuristicI
 		while(times!=0 && index<city_ids.length){
 
 			indexToSwap = sequenceToSwap[index];
-			adjacentIndex = (indexToSwap+1) % city_ids.length;
-			swap(city_ids,indexToSwap,adjacentIndex);
+			swap(city_ids,indexToSwap);
 
 			newCost = deltaEvaluation(oSolution,prevCity_ids,indexToSwap);
 			if(newCost <= originalCost ){ //IO
@@ -46,11 +45,11 @@ public class DavissHillClimbing extends HeuristicOperators implements HeuristicI
 				oSolution.setObjectiveFunctionValue(newCost);
 				originalCost = newCost;
 				times --;
-				prevCity_ids = oSolution.clone().getSolutionRepresentation().getSolutionRepresentation();;
+				prevCity_ids = oSolution.clone().getSolutionRepresentation().getSolutionRepresentation();
 
 			}else{
 				//reject
-				swap(city_ids,adjacentIndex,indexToSwap);
+				swap(city_ids,indexToSwap);
 			}
 			index++;
 		}

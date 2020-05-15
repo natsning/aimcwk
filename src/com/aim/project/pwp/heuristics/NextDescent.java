@@ -26,20 +26,19 @@ public class NextDescent extends HeuristicOperators implements HeuristicInterfac
 
 	@Override
 	public double apply(PWPSolutionInterface oSolution, double dDepthOfSearch, double dIntensityOfMutation) {
-		double newCost = 0;
+		double newCost ;
 		double originalCost = oSolution.getObjectiveFunctionValue();
 		int times = (int)Math.floor(dDepthOfSearch/ 0.2) + 1;
 		int offset = oRandom.nextInt(oSolution.getNumberOfLocations()-2);
 		int index = offset;
 		int[] city_ids = oSolution.getSolutionRepresentation().getSolutionRepresentation();
 		int[] prevCity_ids = oSolution.clone().getSolutionRepresentation().getSolutionRepresentation();
-		int indexToSwap,adjacentIndex;
+		int indexToSwap;
 
 		while(times!=0 && index<city_ids.length+offset){
 
 			indexToSwap = index % city_ids.length;
-			adjacentIndex = (index+1) % city_ids.length;
-			swap(city_ids,indexToSwap,adjacentIndex);
+			swap(city_ids,indexToSwap);
 
 			newCost = deltaEvaluation(oSolution,prevCity_ids,indexToSwap);
 			if(newCost < originalCost ){ //IO
@@ -52,7 +51,7 @@ public class NextDescent extends HeuristicOperators implements HeuristicInterfac
 
 			}else{
 				//reject
-				swap(city_ids,adjacentIndex,indexToSwap);
+				swap(city_ids,indexToSwap);
 			}
 
 			index++;

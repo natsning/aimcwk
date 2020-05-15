@@ -22,6 +22,15 @@ public class HeuristicOperators {
 		return oObjectiveFunction;
 	}
 
+	public void swap(int[] array, int i){
+		int j = i+1;
+		if(j>=array.length){
+			j = 0;
+		}
+		swap(array,i,j);
+
+	}
+
 	public void swap(int[] array, int i,int j){
 
 		int temp = array[i];
@@ -48,7 +57,7 @@ public class HeuristicOperators {
 	 * @return
 	 */
 	public double deltaEvaluation(PWPSolutionInterface sol, int[] prev, int i){
-		double newCost = 0;
+		double newCost;
 		double original = sol.getObjectiveFunctionValue();
 		int lastIndex = prev.length-1;
 		int[] current = sol.getSolutionRepresentation().getSolutionRepresentation();

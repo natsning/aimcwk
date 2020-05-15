@@ -30,7 +30,7 @@ public class SN_HH extends HyperHeuristic {
         oProblem.initialiseSolution(0);
         oProblem.initialiseSolution(1);
 
-        Double initialObjVal = oProblem.getBestSolutionValue();
+        double initialObjVal = oProblem.getBestSolutionValue();
         LateAcceptance lAccept = new LateAcceptance(10,initialObjVal*1.125,rng);
         HeuristicScore hScore = new HeuristicScore(aoMutation.length,initialObjVal*1.2,aoCrossover);
 
@@ -42,7 +42,6 @@ public class SN_HH extends HyperHeuristic {
             oProblem.setDepthOfSearch(1.0);
         }
 
-        System.out.print(instanceSize);
         while ( !hasTimeExpired()) {
 
             h = rouletteWheel(aoMutation,hScore);
