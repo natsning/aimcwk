@@ -16,6 +16,19 @@ public class HeuristicScore {
     private double sum;
     private double timeDefaultValue = 1;
     private ArrayList<Integer> restricted;
+    private boolean restricted_flag = true;
+
+    public HeuristicScore(int numHeuristic,double bounds){
+        this.numHeuristic = numHeuristic;
+        indvScore = new double[numHeuristic];
+        timeScore = new double[numHeuristic];
+        lowerBound = 0;
+        upperBound = bounds*1.2;
+        Utilities.initialiseDoubleArray(timeScore,timeDefaultValue);
+        Utilities.initialiseDoubleArray(indvScore,lowerBound);
+        sum = numHeuristic*lowerBound + numHeuristic*timeDefaultValue;
+        restricted_flag = false;
+    }
 
     public HeuristicScore(int numHeuristic,double bounds, int[] restrictHeuristic){
         this.numHeuristic = numHeuristic;
@@ -41,11 +54,14 @@ public class HeuristicScore {
                     sum -= (timeScore[chosenHIndex]-1);
                 }
                 timeScore[chosenHIndex] = 1;
-            }else if(!restricted.contains(i)){
+            }else if(restricted_flag && !restricted.contains(i)){
 
                 timeScore[i] += 1;
                 sum += 1;
 
+            }else{
+                timeScore[i] += 1;
+                sum += 1;
             }
         }
 

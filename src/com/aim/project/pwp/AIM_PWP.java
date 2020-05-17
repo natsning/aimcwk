@@ -131,9 +131,11 @@ public class AIM_PWP extends ProblemDomain implements Visualisable {
 	@Override
 	public int[] getHeuristicsOfType(HeuristicType type) {
 		
-		// TODO return an array of heuristic IDs based on the heuristic's type.
+		// return an array of heuristic IDs based on the heuristic's type.
 		if(type == HeuristicType.MUTATION){
-			return getHeuristicsThatUseIntensityOfMutation();
+			int[] arr = {0,1,2};
+			return arr;
+//			return getHeuristicsThatUseIntensityOfMutation();
 		}
 		else if(type == HeuristicType.LOCAL_SEARCH){
 			return getHeuristicsThatUseDepthOfSearch();

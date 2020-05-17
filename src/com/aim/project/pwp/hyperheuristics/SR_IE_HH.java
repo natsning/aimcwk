@@ -29,7 +29,7 @@ public class SR_IE_HH extends HyperHeuristic {
 		int h = 1;
 		long iteration = 0;
 		boolean accept;
-		System.out.println("Iteration\tf(s)\tf(s')\tAccept");
+//		System.out.println("Iteration\tf(s)\tf(s')\tAccept");
 
 		while(!hasTimeExpired() ) {
 
@@ -38,8 +38,9 @@ public class SR_IE_HH extends HyperHeuristic {
 			if(h < 5) {
 				candidate = oProblem.applyHeuristic(h, 0, 1);
 			} else {
-				oProblem.initialiseSolution(2);
-				candidate = oProblem.applyHeuristic(h, 0, 2, 1);
+//				oProblem.initialiseSolution(2);
+//				candidate = oProblem.applyHeuristic(h, 0, 2, 1);
+				continue;
 			}
 
 			accept = candidate <= current;

@@ -20,24 +20,39 @@ public class SN_HH extends HyperHeuristic {
     protected void solve(ProblemDomain oProblem) {
 
         int[] aoCrossover = oProblem.getHeuristicsOfType(ProblemDomain.HeuristicType.CROSSOVER);
-        int[] aoMutation = oProblem.getHeuristicsThatUseIntensityOfMutation();
+        int[] aoMutation;
+        int[] aoLSearch = oProblem.getHeuristicsThatUseDepthOfSearch();
         long iteration = 0;
         double current,candidate,delta;
         int h;
         int instanceSize = ((Visualisable)oProblem).getLoadedInstance().getNumberOfLocations();
+        LateAcceptance lAccept;
+        HeuristicScore hScore;
 
         oProblem.setMemorySize(3);
         oProblem.initialiseSolution(0);
         oProblem.initialiseSolution(1);
 
         double initialObjVal = oProblem.getBestSolutionValue();
-        LateAcceptance lAccept = new LateAcceptance(10,initialObjVal*1.125,rng);
-        HeuristicScore hScore = new HeuristicScore(aoMutation.length,initialObjVal*1.2,aoCrossover);
 
-        if(instanceSize<200){
-            oProblem.setIntensityOfMutation(0.2);
+        if(instanceSize<50){
+            aoMutation = oProblem.getHeuristicsOfType(ProblemDomain.HeuristicType.MUTATION);
+            hScore = new HeuristicScore(aoMutation.length,initialObjVal*1.2);
+            lAccept = new LateAcceptance(10,initialObjVal*1.2,rng);
+            oProblem.setIntensityOfMutation(0.3);
+            oProblem.setDepthOfSearch(0.3);
+        }
+        else if(instanceSize<200){
+
+            aoMutation = oProblem.getHeuristicsThatUseIntensityOfMutation();
+            hScore = new HeuristicScore(aoMutation.length,initialObjVal*1.2,aoCrossover);
+            lAccept = new LateAcceptance(4,initialObjVal*1.1,rng);
+            oProblem.setIntensityOfMutation(0.3);
             oProblem.setDepthOfSearch(0.5);
         }else{
+            aoMutation = oProblem.getHeuristicsThatUseIntensityOfMutation();
+            hScore = new HeuristicScore(aoMutation.length,initialObjVal*1.2,aoCrossover);
+            lAccept = new LateAcceptance(10,initialObjVal*1.125,rng);
             oProblem.setIntensityOfMutation(0.1);
             oProblem.setDepthOfSearch(1.0);
         }
@@ -57,8 +72,7 @@ public class SN_HH extends HyperHeuristic {
 
             }
 
-
-            oProblem.applyHeuristic(oProblem.getHeuristicsThatUseDepthOfSearch()[rng.nextInt(2)],2,2);
+            oProblem.applyHeuristic(aoLSearch[rng.nextInt(aoLSearch.length)],2,2);
 
             current = oProblem.getFunctionValue(0);
             if(candidate<= lAccept.getAverage()){
