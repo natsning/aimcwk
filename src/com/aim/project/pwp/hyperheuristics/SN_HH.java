@@ -39,7 +39,7 @@ public class SN_HH extends HyperHeuristic {
             aoMutation = oProblem.getHeuristicsOfType(ProblemDomain.HeuristicType.MUTATION);
             hScore = new HeuristicScore(aoMutation.length,initialObjVal*1.2);
             lAccept = new LateAcceptance(10,initialObjVal*1.2,rng);
-            oProblem.setIntensityOfMutation(0.3);
+            oProblem.setIntensityOfMutation(0.1);
             oProblem.setDepthOfSearch(0.3);
         }
         else if(instanceSize<200){

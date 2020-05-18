@@ -14,7 +14,11 @@ public class LateAcceptance {
 
     public LateAcceptance(int degreeOfLateness,double defaultValue, Random rng){
         num = degreeOfLateness;
-        pointIndex = rng.nextInt(num-1)+1; //does not start from 0
+        if(degreeOfLateness > 1){
+            pointIndex = rng.nextInt(num-1)+1; //does not start from 0
+        }else{
+            pointIndex = 0;
+        }
 
         aoObjectiveValues = new double[degreeOfLateness];
         for (int i=0; i < num; i++){

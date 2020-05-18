@@ -135,7 +135,6 @@ public class AIM_PWP extends ProblemDomain implements Visualisable {
 		if(type == HeuristicType.MUTATION){
 			int[] arr = {0,1,2};
 			return arr;
-//			return getHeuristicsThatUseIntensityOfMutation();
 		}
 		else if(type == HeuristicType.LOCAL_SEARCH){
 			return getHeuristicsThatUseDepthOfSearch();
